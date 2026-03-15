@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Reflow Magic Link</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9fafb;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .email-wrapper {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #1f2937;
+        }
+        .content p {
+            margin: 12px 0;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .button-container {
+            text-align: center;
+            margin: 32px 0;
+        }
+        .magic-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        .magic-button:hover {
+            transform: translateY(-2px);
+        }
+        .token-box {
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 24px 0;
+            font-family: "Courier New", monospace;
+            font-size: 13px;
+            color: #1f2937;
+            word-break: break-all;
+            text-align: center;
+        }
+        .footer {
+            background-color: #f9fafb;
+            padding: 24px 30px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+        }
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .warning {
+            background-color: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 16px 0;
+            font-size: 13px;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="email-wrapper">
+            <!-- Header -->
+            <div class="header">
+                <h1>ReFLOW</h1>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <h2>Welcome to Reflow!</h2>
+                
+                <p>We're excited to have you join our community of teams creating amazing flowcharts together.</p>
+
+                <p><strong>Click the button below to sign in to your account:</strong></p>
+
+                <p style="text-align: center; margin-top: 24px;">Or copy and paste this link in your browser:</p>
+                <div class="token-box">
+                    {{ .TokenHash }}
+                </div>
+
+                <div class="warning">
+                    <strong>This link expires in 15 minutes</strong> for your security.
+                </div>
+
+                <p>If you didn't request this link, you can safely ignore this email.</p>
+
+                <p style="margin-top: 32px; font-size: 13px; color: #9ca3af;">
+                    <strong>Questions?</strong> Reply to this email or visit our 
+                    <a href="https://reflow.app/help" style="color: #2563eb; text-decoration: none;">help center</a>.
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>
+                    © 2026 Reflow. All rights reserved.<br>
+                    <a href="https://reflow.app">reflow.app</a> | 
+                    <a href="https://reflow.app/privacy">Privacy</a> | 
+                    <a href="https://reflow.app/terms">Terms</a>
+                </p>
+                <p style="margin-top: 16px; color: #9ca3af;">
+                    You received this email because you registered for Reflow.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

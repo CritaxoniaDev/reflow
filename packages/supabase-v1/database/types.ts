@@ -1,53 +1,42 @@
 export interface User {
   id: string
+  username: string
   email: string
-  name: string | null
+  token: string | null
+  token_expires_at: string | null
   created_at: string
   updated_at: string
 }
 
-export interface Post {
-  id: string
-  user_id: string
-  title: string
-  content: string
-  created_at: string
-  updated_at: string
-}
-
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       users: {
         Row: User
         Insert: {
+          username: string
           email: string
-          name?: string | null
+          token?: string | null
+          token_expires_at?: string | null
+          id?: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
+          username?: string
           email?: string
-          name?: string | null
-        }
-        Relationships: []
-      }
-      posts: {
-        Row: Post
-        Insert: {
-          user_id: string
-          title: string
-          content: string
-        }
-        Update: {
-          user_id?: string
-          title?: string
-          content?: string
+          token?: string | null
+          token_expires_at?: string | null
+          id?: string
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
-    CompositeTypes: Record<string, never>
+    Views: {}
+    Functions: {}
+    Enums: {}
+    CompositeTypes: {}
   }
 }

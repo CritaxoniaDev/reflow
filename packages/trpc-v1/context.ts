@@ -1,12 +1,8 @@
-import type { CreateNextContextOptions } from '@trpc/server/adapters/next'
+import type { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch'
 
-export async function createContext(opts?: CreateNextContextOptions) {
-  const { req, res } = opts ?? {}
-
+export async function createContext(opts: FetchCreateContextFnOptions) {
   return {
-    req,
-    res,
-    // Add user from JWT, db connection, etc.
+    req: opts.req,
   }
 }
 

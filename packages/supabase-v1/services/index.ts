@@ -1,2 +1,2 @@
 export * as userService from './users'
-export * as postService from './posts'
+export * as emailService from './email'
