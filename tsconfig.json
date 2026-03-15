@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -19,7 +20,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@shadcn/*": ["packages/shadcn-v1/*"],
+      "@supabase/*": ["packages/supabase-v1/*"],
+      "@trpc/*": ["packages/trpc-v1/*"]
     }
   },
   "include": [

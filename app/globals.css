@@ -1,3 +1,13 @@
+@font-face {
+    font-family: "Aloja Extended";
+    src: url("https://db.onlinewebfonts.com/t/b12cce617218fe8bfa367def9a61af72.eot");
+    src: url("https://db.onlinewebfonts.com/t/b12cce617218fe8bfa367def9a61af72.eot?#iefix")format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/b12cce617218fe8bfa367def9a61af72.woff2")format("woff2"),
+    url("https://db.onlinewebfonts.com/t/b12cce617218fe8bfa367def9a61af72.woff")format("woff"),
+    url("https://db.onlinewebfonts.com/t/b12cce617218fe8bfa367def9a61af72.ttf")format("truetype"),
+    url("https://db.onlinewebfonts.com/t/b12cce617218fe8bfa367def9a61af72.svg#Aloja Extended")format("svg");
+}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -48,6 +58,7 @@
 }
 
 :root {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -83,6 +94,7 @@
 }
 
 .dark {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -120,10 +132,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
+}
+
+::view-transition-old(root), ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
 }

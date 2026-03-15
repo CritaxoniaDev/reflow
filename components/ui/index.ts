@@ -1,0 +1,5 @@
+export { Button } from '@shadcn/button'
+export { Card } from '@shadcn/card'
+export { Dialog } from '@shadcn/dialog'
+export { Input } from '@shadcn/input'
+export { Label } from '@shadcn/label'
