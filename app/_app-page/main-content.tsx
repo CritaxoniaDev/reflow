@@ -8,7 +8,16 @@ import { Footer } from './sections/footer'
 
 export function MainContent() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
+    <div className="bg-gradient-to-b from-background to-background">
+      {/* Visual texture - dot pattern on dark sections */}
+      <style>{`
+        .dot-pattern {
+          background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+          background-size: 32px 32px;
+          opacity: 0.03;
+        }
+      `}</style>
+      
       <Header />
       <Hero />
       <Features />

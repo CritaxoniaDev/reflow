@@ -1,10 +1,14 @@
 'use client'
 
 import { NavLink } from '@/components/common/nav-link'
+import { useRouter } from 'next/navigation'
 import { AnimatedThemeToggler } from '@/components/common/animated-theme-toggler'
 import { Button } from '@/components/ui'
 
 export function Header() {
+
+  const router = useRouter()
+  
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-black/80">
       <div className="mx-auto max-w-7xl px-6 py-3">
@@ -35,6 +39,7 @@ export function Header() {
             </Button>
             <Button
               size="sm"
+              onClick={() => router.push('/auth/register')}
               className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700"
             >
               Get Started

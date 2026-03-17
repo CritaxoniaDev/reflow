@@ -1,10 +1,14 @@
 'use client'
 
 import { ArrowRight, Sparkles, Play } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui'
+import { PointerHighlight } from '@/components/ui/pointer-highlight'
 import { FlowDemo } from './flow-demo'
 
 export function Hero() {
+  const router = useRouter()
+
   return (
     <section className="relative overflow-hidden">
       {/* Background gradient */}
@@ -25,12 +29,16 @@ export function Hero() {
             {/* Heading */}
             <div className="space-y-4">
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight">
-                <span className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 dark:from-white dark:via-zinc-100 dark:to-white bg-clip-text text-transparent">
-                  Realtime <span className='text-6xl font-light' style={{ fontFamily: '"Aloja Extended", sans-serif' }}>Flowchart</span>
-                </span>
+                <PointerHighlight pointerClassName="text-blue-500">
+                  <span className="bg-gradient-to-r from-zinc-900 pr-1 via-zinc-800 to-zinc-900 dark:from-white dark:via-zinc-100 dark:to-white bg-clip-text text-transparent">
+                    Realtime
+                  </span>
+                </PointerHighlight>
+                {' '}
+                <span className='text-6xl font-light' style={{ fontFamily: '"Aloja Extended", sans-serif' }}>Flowchart</span>
                 {' '}
                 <span className="bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
-                Creator
+                  Creator
                 </span>
               </h1>
               <p className="text-lg sm:text-base text-zinc-600 dark:text-zinc-300 max-w-xl leading-relaxed">
@@ -50,10 +58,11 @@ export function Hero() {
               <Button
                 variant="outline"
                 size="lg"
+                onClick={() => router.push('/demo')}
                 className="border-2 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 dark:border-zinc-700"
               >
-                <Play className="w-4 h-4 mr-2" />
-                Watch Demo
+                <Play className="mr-2 w-5 h-5" />
+                Try Demo
               </Button>
             </div>
 
@@ -78,7 +87,7 @@ export function Hero() {
           <div className="relative">
             {/* Glow effect */}
             <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl blur-3xl opacity-50 dark:opacity-100" />
-            
+
             {/* Demo container */}
             <div className="relative">
               <FlowDemo />
