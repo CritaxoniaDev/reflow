@@ -5,6 +5,7 @@ import { httpBatchLink } from '@trpc/client'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ThemeProvider } from 'next-themes'
 import { ReactNode, useState } from 'react'
+import { GooeyToaster } from 'goey-toast'
 import { trpc, getTRPCUrl } from '@/utils/trpc'
 import { SEOProvider } from './seo-provider'
 import { LenisProvider } from './lenis-provider'
@@ -35,6 +36,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
               <NuqsAdapter>{children}</NuqsAdapter>
+              <GooeyToaster position="top-right" />
             </QueryClientProvider>
           </trpc.Provider>
         </LenisProvider>

@@ -33,6 +33,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="sm"
+              onClick = {() => router.push('/auth/login')}
               className="text-sm font-medium"
             >
               Sign In

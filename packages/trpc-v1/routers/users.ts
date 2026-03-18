@@ -1,55 +1,123 @@
 import { z } from 'zod'
 import { publicProcedure, router } from '../index'
 import { userService } from '@supabase/index'
+import { TRPCError } from '@trpc/server'
+import { createAdminClient } from '@supabase/server'
 
-const registerSchema = z.object({
-  username: z.string().min(3).max(20),
-  email: z.string().email(),
+// Create a protected procedure that requires authentication
+const protectedProcedure = publicProcedure.use(async (opts) => {
+  if (!opts.ctx.user) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+      message: 'User must be authenticated',
+    })
+  }
+  return opts.next({
+    ctx: {
+      ...opts.ctx,
+      user: opts.ctx.user,
+    },
+  })
 })
 
 export const usersRouter = router({
+  // Only checks username and sends OTP (no profile creation yet)
   register: publicProcedure
-    .input(registerSchema)
+    .input(z.object({
+      username: z.string().min(3).max(20),
+      email: z.string().email(),
+    }))
     .mutation(async ({ input }) => {
       // Check if username exists
       const existingUsername = await userService.getUserByUsername(input.username)
       if (existingUsername) {
-        throw new Error('Username already taken')
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Username already taken',
+        })
       }
 
-      // Check if email exists
-      const existingEmail = await userService.getUserByEmail(input.email)
-      if (existingEmail) {
-        throw new Error('Email already registered')
-      }
-
-      // Create user profile in the database
+      // Send OTP (this will create auth.users entry when user verifies OTP)
       try {
-        await userService.registerUserProfile(input.username, input.email)
+        await userService.initiateRegistration(input.email)
       } catch (err: any) {
-        console.error('Failed to create user profile:', err)
-        throw new Error('Failed to create account. Please try again.')
+        console.error('Failed to send OTP:', err)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to send magic link. Please try again.',
+        })
       }
 
       return {
         success: true,
-        message: 'Account created. Check your email for the magic link!',
+        message: 'Check your email for the magic link!',
         email: input.email,
       }
     }),
 
-  verifySession: publicProcedure
+  signIn: publicProcedure
     .input(z.object({ email: z.string().email() }))
     .mutation(async ({ input }) => {
+      const normalizedEmail = input.email.toLowerCase()
+
+      // Send magic link (works for existing or new users after they verify)
+      try {
+        await userService.signInWithOtp(normalizedEmail)
+      } catch (err: any) {
+        console.error('Failed to send OTP:', err)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to send magic link. Please try again.',
+        })
+      }
+
+      return {
+        success: true,
+        message: 'Magic link sent to your email',
+        email: normalizedEmail,
+      }
+    }),
+
+  // Verify OTP and create profile (all server-side)
+  verifyAndCreateProfile: publicProcedure 
+    .input(z.object({
+      email: z.string().email(),
+      code: z.string(), // Not used - OTP already verified client-side
+      username: z.string().min(3).max(20),
+    }))
+    .mutation(async ({ input, ctx }) => {
       try {
         const normalizedEmail = input.email.toLowerCase()
 
-        // Get user to confirm they exist
-        const user = await userService.getUserByEmail(normalizedEmail)
+        console.log('verifyAndCreateProfile: Creating profile for:', normalizedEmail)
+
+        // Check if user is authenticated
+        if (!ctx.user) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'You must verify your email first',
+          })
+        }
+
+        // Check if profile already exists
+        let user = await userService.getUserByEmail(normalizedEmail)
 
         if (!user) {
-          console.error(`User not found for email: ${normalizedEmail}`)
-          throw new Error('User not found. Please register first.')
+          // Create profile with the authenticated user's ID
+          try {
+            user = await userService.registerUserProfile(
+              ctx.user.id,
+              input.username,
+              normalizedEmail
+            )
+            console.log('Profile created:', user)
+          } catch (err: any) {
+            console.error('Failed to create profile:', err)
+            throw new TRPCError({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'Failed to create profile. Please try again.',
+            })
+          }
         }
 
         return {
@@ -58,11 +126,73 @@ export const usersRouter = router({
             id: user.id,
             email: user.email,
             username: user.username,
-          }
+          },
         }
       } catch (err: any) {
-        console.error('verifySession error:', err.message)
-        throw err
+        console.error('verifyAndCreateProfile error:', err)
+        throw err instanceof TRPCError ? err : new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: err.message || 'Verification failed',
+        })
+      }
+    }),
+
+  // Verify OTP for login
+  verifyLogin: publicProcedure
+    .input(z.object({
+      email: z.string().email(),
+      code: z.string(), // Not used - OTP already verified client-side
+    }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const normalizedEmail = input.email.toLowerCase()
+
+        console.log('verifyLogin: Getting profile for:', normalizedEmail)
+
+        // Check if user is authenticated
+        if (!ctx.user) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'You must verify your email first',
+          })
+        }
+
+        // Get existing user profile
+        const user = await userService.getUserByEmail(normalizedEmail)
+
+        if (!user) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'User profile not found. Please register first.',
+          })
+        }
+
+        console.log('Login successful:', user.email)
+
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+          },
+        }
+      } catch (err: any) {
+        console.error('verifyLogin error:', err)
+        throw err instanceof TRPCError ? err : new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: err.message || 'Login verification failed',
+        })
+      }
+    }),
+
+
+  // Get current authenticated user
+  getCurrentUser: protectedProcedure
+    .query(({ ctx }) => {
+      return {
+        id: ctx.user.id,
+        email: ctx.user.email,
       }
     }),
 })

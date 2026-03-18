@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers/providers";
+import 'goey-toast/styles.css'
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",

@@ -5,50 +5,23 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Mail, User } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { Input } from '@shadcn/input'
-import { Label } from '@shadcn/label'
-import { trpc } from '@/utils/trpc'
-import { userService } from '@/packages/supabase-v1/services'
+import { Input } from '@/components/ui'
+import { Label } from '@/components/ui'
+import { registerFormConfig, useRegisterMutation, handleRegisterSubmit } from '@/components/auth/_ts/register'
 
 export function RegisterForm() {
     const router = useRouter()
     const [username, setUsername] = useState('')
     const [email, setEmail] = useState('')
-    const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
 
-    const registerMutation = trpc.users.register.useMutation({
-        onSuccess: async (data) => {
-            setSuccess(data.message)
+    const registerMutation = useRegisterMutation(router)
 
-            try {
-                // Call Supabase OTP - Supabase sends the email automatically
-                await userService.signInWithOtp(
-                    data.email,
-                    `${window.location.origin}/auth/verify`
-                )
-
-                setSuccess('Magic link sent! Check your email.')
-                setUsername('')
-                setEmail('')
-
-                // Redirect to verify page
-                router.push(`/auth/verify?email=${encodeURIComponent(data.email)}`)
-            } catch (err: any) {
-                setError(err.message || 'Failed to send magic link')
-            }
-        },
-        onError: (error) => {
-            setError(error.message)
-        },
-    })
-
-    async function handleSubmit(e: React.FormEvent) {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        setError('')
-        setSuccess('')
-
-        registerMutation.mutate({ username, email })
+        handleRegisterSubmit(e, username, email, registerMutation, () => {
+            setUsername('')
+            setEmail('')
+        })
     }
 
     return (
@@ -74,14 +47,14 @@ export function RegisterForm() {
                     {/* Username */}
                     <div className="space-y-3">
                         <Label htmlFor="username" className="text-sm font-semibold text-zinc-900 dark:text-white">
-                            Username
+                            {registerFormConfig.fields.username.label}
                         </Label>
                         <div className="relative group">
                             <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-focus-within:text-blue-600 transition-colors" />
                             <Input
                                 id="username"
                                 type="text"
-                                placeholder="john_doe"
+                                placeholder={registerFormConfig.fields.username.placeholder}
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 disabled={registerMutation.isPending}
@@ -90,21 +63,21 @@ export function RegisterForm() {
                             />
                         </div>
                         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                            Your unique identifier. Can contain letters, numbers, and underscores.
+                            {registerFormConfig.fields.username.hint}
                         </p>
                     </div>
 
                     {/* Email */}
                     <div className="space-y-3">
                         <Label htmlFor="email" className="text-sm font-semibold text-zinc-900 dark:text-white">
-                            Work Email
+                            {registerFormConfig.fields.email.label}
                         </Label>
                         <div className="relative group">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-focus-within:text-blue-600 transition-colors" />
                             <Input
                                 id="email"
                                 type="email"
-                                placeholder="you@company.com"
+                                placeholder={registerFormConfig.fields.email.placeholder}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={registerMutation.isPending}
@@ -113,23 +86,9 @@ export function RegisterForm() {
                             />
                         </div>
                         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                            We'll send you a secure magic link to sign in.
+                            {registerFormConfig.fields.email.hint}
                         </p>
                     </div>
-
-                    {/* Error */}
-                    {error && (
-                        <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 p-4">
-                            <p className="text-sm font-medium text-red-700 dark:text-red-300">{error}</p>
-                        </div>
-                    )}
-
-                    {/* Success */}
-                    {success && (
-                        <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-4">
-                            <p className="text-sm font-medium text-green-700 dark:text-green-300">{success}</p>
-                        </div>
-                    )}
 
                     {/* Submit */}
                     <Button
@@ -147,7 +106,7 @@ export function RegisterForm() {
             <div className="text-center space-y-4">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
                     Already have an account?{' '}
-                    <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                    <Link href="/auth/login" className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
                         Sign in
                     </Link>
                 </p>

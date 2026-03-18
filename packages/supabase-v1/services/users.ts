@@ -38,15 +38,32 @@ export async function getUserByUsername(username: string) {
   return data as User | null
 }
 
-export async function registerUserProfile(username: string, email: string) {
+// NEW: Just initiate registration by sending OTP (auth user created when OTP verified)
+export async function initiateRegistration(email: string, redirectTo?: string) {
+  const supabase = createBrowserClient()
+  
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email.toLowerCase(),
+    options: {
+      emailRedirectTo: redirectTo || `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/verify`,
+    },
+  })
+
+  if (error) throw error
+  return { success: true }
+}
+
+// Now takes userId (from authenticated user) and creates profile
+export async function registerUserProfile(userId: string, username: string, email: string) {
   const supabase = createAdminClient()
   const normalizedEmail = email.toLowerCase()
   
-  console.log('Creating user with email:', normalizedEmail, 'username:', username)
+  console.log('Creating user profile with id:', userId, 'email:', normalizedEmail, 'username:', username)
   
   const { data, error } = await supabase
     .from('users')
     .insert({
+      id: userId,
       username,
       email: normalizedEmail,
     } as any)
@@ -58,7 +75,7 @@ export async function registerUserProfile(username: string, email: string) {
     throw error
   }
   
-  console.log('User created:', data)
+  console.log('User profile created:', data)
   return data as User
 }
 
@@ -74,20 +91,4 @@ export async function signInWithOtp(email: string, redirectTo?: string) {
 
   if (error) throw error
   return { success: true }
-}
-
-export async function verifyOtp(email: string, token: string) {
-  const supabase = createBrowserClient()
-  
-  const { data, error } = await supabase.auth.verifyOtp({
-    email: email.toLowerCase(),
-    token,
-    type: 'email',
-  })
-
-  if (error) {
-    return { data: null, error }
-  }
-  
-  return { data, error: null }
 }

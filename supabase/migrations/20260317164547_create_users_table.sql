@@ -1,6 +1,6 @@
--- Users table with OTP authentication
+-- Users table linked to Supabase auth
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
   token TEXT, -- OTP token for magic link
@@ -22,7 +22,7 @@ CREATE POLICY "Users can read their own data"
 ON users FOR SELECT
 USING (auth.uid() = id);
 
--- Allow insert for new users
+-- Allow insert for new users (for signup)
 CREATE POLICY "Anyone can insert a user"
 ON users FOR INSERT
 WITH CHECK (true);
@@ -30,4 +30,9 @@ WITH CHECK (true);
 -- Allow update for authenticated users
 CREATE POLICY "Users can update their own data"
 ON users FOR UPDATE
+USING (auth.uid() = id);
+
+-- Allow delete for authenticated users
+CREATE POLICY "Users can delete their own data"
+ON users FOR DELETE
 USING (auth.uid() = id);
