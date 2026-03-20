@@ -36,7 +36,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
               <NuqsAdapter>{children}</NuqsAdapter>
-              <GooeyToaster position="top-right" />
+              <GooeyToaster position="bottom-right" />
             </QueryClientProvider>
           </trpc.Provider>
         </LenisProvider>

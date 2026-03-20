@@ -29,10 +29,10 @@ export function Toolbox() {
 
   return (
     <TooltipProvider>
-      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50">
         {/* Dock Container */}
-        <div className="bg-black/40 dark:bg-white/10 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl px-4 py-3 shadow-2xl">
-          <div className="flex items-end justify-center gap-2">
+        <div className="bg-black/40 dark:bg-white/10 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl px-3 py-4 shadow-2xl">
+         <div className="grid grid-cols-2 gap-2">
             {nodeTypes.map((node, index) => {
               const Icon = node.icon
 
@@ -62,8 +62,8 @@ export function Toolbox() {
           </div>
 
           {/* Dock Label */}
-          <div className="text-center mt-2 text-xs text-white font-medium">
-            Drag to canvas • Double-click to edit • Delete key to remove
+          <div className="text-center mt-3 text-xs text-white font-medium whitespace-nowrap">
+            Drag • Edit • Delete
           </div>
         </div>
       </div>

@@ -46,7 +46,7 @@ export async function proxy(request: NextRequest) {
   console.log('Middleware: User:', user?.email, 'Path:', request.nextUrl.pathname, 'Cookies:', request.headers.get('cookie')?.substring(0, 100))
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/demo']
+  const protectedRoutes = ['/dashboard', '/api/flows', '/api/teams', '/api/users']
   const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useSupabaseRealtime } from './_ts/realtime'
 import {
     LogOut,
@@ -68,11 +68,15 @@ export default function DashboardLayout({
     children: React.ReactNode
 }) {
     const router = useRouter()
+    const pathname = usePathname()
     const { handleLogout, isLoading } = useLogout()
     const { username, teamName } = useAccountInfo()
     
     // Enable realtime sync for all dashboard pages
     useSupabaseRealtime()
+
+    // Don't show global header on flowchart editor pages
+    const isFlowchartEditor = pathname.match(/^\/dashboard\/my\/[^/]+$/)
 
     return (
         <SidebarProvider defaultOpen={true} suppressHydrationWarning>
@@ -84,19 +88,22 @@ export default function DashboardLayout({
                         <SidebarGroupLabel>Main</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu suppressHydrationWarning>
-                                {navigationItems.map((item) => (
-                                    <SidebarMenuItem key={item.title} suppressHydrationWarning>
-                                        <SidebarMenuButton className='cursor-pointer'
-                                            isActive={item.isActive}
-                                            tooltip={item.title}
-                                            onClick={() => router.push(item.href)}
-                                            suppressHydrationWarning
-                                        >
-                                            <item.icon className="h-4 w-4" />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
+                                {navigationItems.map((item) => {
+                                    const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard')
+                                    return (
+                                        <SidebarMenuItem key={item.title} suppressHydrationWarning>
+                                            <SidebarMenuButton className='cursor-pointer'
+                                                isActive={isActive}
+                                                tooltip={item.title}
+                                                onClick={() => router.push(item.href)}
+                                                suppressHydrationWarning
+                                            >
+                                                <item.icon className="h-4 w-4" />
+                                                <span>{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )
+                                })}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>
@@ -171,7 +178,7 @@ export default function DashboardLayout({
             </Sidebar>
 
             <div className="flex flex-col flex-1">
-                <AuthNavHead />
+                {!isFlowchartEditor && <AuthNavHead />}
                 {children}
             </div>
         </SidebarProvider>

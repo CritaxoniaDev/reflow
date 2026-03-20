@@ -14,9 +14,7 @@ export function StartEndNode({ data, selected }: any) {
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing) {
-      setIsEditing(true)
-    }
+    setIsEditing(data.isEditing ?? false)
   }, [data.isEditing])
 
   const handleBlur = () => {
@@ -41,17 +39,17 @@ export function StartEndNode({ data, selected }: any) {
   return (
     <>
       {!isStart && <Handle type="target" position={Position.Top} />}
-      
+
       <div
-        className={`px-6 py-3 rounded-full shadow-md border-2 transition-all font-medium text-sm flex items-center gap-2 ${
-          data.isHighlighted
-            ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-110'
-            : selected
+        onDoubleClick={() => setIsEditing(true)}
+        className={`px-6 py-3 rounded-full shadow-md border-2 transition-all font-medium text-sm flex items-center gap-2 ${data.isHighlighted
+          ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-110'
+          : selected
             ? 'border-primary ring-2 ring-primary/50'
             : isStart
-            ? 'border-green-500 text-green-700 dark:text-green-300'
-            : 'border-red-500 text-red-700 dark:text-red-300'
-        }`}
+              ? 'border-green-500 text-green-700 dark:text-green-300'
+              : 'border-red-500 text-red-700 dark:text-red-300'
+          }`}
       >
         {isEditing ? (
           <input
@@ -62,11 +60,10 @@ export function StartEndNode({ data, selected }: any) {
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
-            className={`bg-transparent border-b rounded px-2 py-1 outline-none text-sm font-medium w-24 ${
-              isStart
-                ? 'border-green-500 text-green-700 dark:text-green-300'
-                : 'border-red-500 text-red-700 dark:text-red-300'
-            }`}
+            className={`bg-transparent border-b rounded px-2 py-1 outline-none text-sm font-medium w-24 ${isStart
+              ? 'border-green-500 text-green-700 dark:text-green-300'
+              : 'border-red-500 text-red-700 dark:text-red-300'
+              }`}
           />
         ) : (
           <>

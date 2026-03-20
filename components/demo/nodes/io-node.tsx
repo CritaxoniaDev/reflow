@@ -13,9 +13,7 @@ export function IONode({ data, selected }: any) {
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing) {
-      setIsEditing(true)
-    }
+    setIsEditing(data.isEditing ?? false)
   }, [data.isEditing])
 
   const isHighlighted = data.isHighlighted
@@ -45,7 +43,10 @@ export function IONode({ data, selected }: any) {
   }
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: '160px', height: '80px' }}>
+    <div
+      onDoubleClick={() => setIsEditing(true)}
+      className="relative flex items-center justify-center"
+      style={{ width: '160px', height: '80px' }}>
       <svg
         width="160"
         height="80"
@@ -85,10 +86,10 @@ export function IONode({ data, selected }: any) {
         ) : (
           <>
             <ArrowRight className={`size-4 ${isHighlighted
-                ? 'text-yellow-400'
-                : selected
-                  ? 'text-primary'
-                  : 'text-purple-700 dark:text-purple-300'
+              ? 'text-yellow-400'
+              : selected
+                ? 'text-primary'
+                : 'text-purple-700 dark:text-purple-300'
               }`} />
             <span className={
               isHighlighted

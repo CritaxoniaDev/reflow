@@ -14,6 +14,16 @@ export interface Team {
   updated_at: string
 }
 
+export interface Flowchart {
+  id: string
+  user_id: string
+  team_id: string | null
+  name: string
+  content: any
+  created_at: string
+  updated_at: string
+}
+
 export interface UserWithTeam extends User {
   teams: Team | null
 }
@@ -54,6 +64,24 @@ export interface Database {
         }
         Update: {
           name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      flowcharts: {
+        Row: Flowchart
+        Insert: {
+          user_id: string
+          name: string
+          team_id?: string | null
+          content?: any
+          id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          name?: string
+          content?: any
           updated_at?: string
         }
         Relationships: []

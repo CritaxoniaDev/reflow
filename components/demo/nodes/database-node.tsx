@@ -13,9 +13,7 @@ export function DatabaseNode({ data, selected }: any) {
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing) {
-      setIsEditing(true)
-    }
+    setIsEditing(data.isEditing ?? false)
   }, [data.isEditing])
 
   const handleBlur = () => {
@@ -39,25 +37,25 @@ export function DatabaseNode({ data, selected }: any) {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center shadow-md border-2 border-t-2 transition-all cursor-pointer relative ${
-        data.isHighlighted
-          ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
-          : selected
+      onDoubleClick={() => setIsEditing(true)}
+      className={`flex flex-col items-center justify-center shadow-md border-2 border-t-2 transition-all cursor-pointer relative ${data.isHighlighted
+        ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
+        : selected
           ? 'border-primary ring-2 ring-primary/50'
           : 'border-indigo-500 text-indigo-700 dark:text-indigo-300'
-      }`}
+        }`}
       style={{
         width: '120px',
         height: '90px',
       }}
     >
       <Handle type="target" position={Position.Top} />
-      
+
       {/* Top ellipse */}
       <div className="w-full h-6 border-2 border-current rounded-t-full flex items-center justify-center relative -mb-2">
         <Database className="size-4" />
       </div>
-      
+
       {/* Middle section */}
       <div className="w-full flex-1 border-l-2 border-r-2 border-current flex items-center justify-center text-xs text-center px-2 font-medium">
         {isEditing ? (
@@ -75,10 +73,10 @@ export function DatabaseNode({ data, selected }: any) {
           <span>{label}</span>
         )}
       </div>
-      
+
       {/* Bottom ellipse */}
       <div className="w-full h-5 border-2 border-current rounded-b-full" />
-      
+
       <Handle type="source" position={Position.Bottom} />
     </div>
   )

@@ -13,9 +13,7 @@ export function ProcessNode({ data, selected }: any) {
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing) {
-      setIsEditing(true)
-    }
+    setIsEditing(data.isEditing ?? false)
   }, [data.isEditing])
 
   const handleBlur = () => {
@@ -40,15 +38,15 @@ export function ProcessNode({ data, selected }: any) {
   return (
     <>
       <Handle type="target" position={Position.Top} />
-      
+
       <div
-        className={`px-4 py-3 rounded-lg shadow-md border-2 transition-all text-sm font-medium flex items-center gap-2 ${
-          data.isHighlighted
+        onDoubleClick={() => setIsEditing(true)}
+        className={`px-4 py-3 rounded-lg shadow-md border-2 transition-all text-sm font-medium flex items-center gap-2 ${data.isHighlighted
             ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
             : selected
-            ? 'border-primary ring-2 ring-primary/50'
-            : 'border-blue-600 text-blue-700 dark:text-blue-300'
-        }`}
+              ? 'border-primary ring-2 ring-primary/50'
+              : 'border-blue-600 text-blue-700 dark:text-blue-300'
+          }`}
       >
         {isEditing ? (
           <input

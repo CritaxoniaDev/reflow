@@ -13,23 +13,22 @@ export const navigationItems = [
     {
         title: 'Dashboard',
         icon: LayoutDashboard,
-        href: '#',
-        isActive: true,
+        href: '/dashboard',
     },
     {
         title: 'My Flowcharts',
         icon: Workflow,
-        href: '#',
+        href: '/dashboard/my',
     },
     {
         title: 'Team',
         icon: Users,
-        href: '#',
+        href: '/dashboard/team',
     },
     {
         title: 'Settings',
         icon: Settings,
-        href: '#',
+        href: '/dashboard/settings',
     },
 ]
 

@@ -13,9 +13,7 @@ export function DocumentNode({ data, selected }: any) {
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing) {
-      setIsEditing(true)
-    }
+    setIsEditing(data.isEditing ?? false)
   }, [data.isEditing])
 
   const handleBlur = () => {
@@ -39,16 +37,16 @@ export function DocumentNode({ data, selected }: any) {
 
   return (
     <div
-      className={`px-4 py-3 rounded-t-lg shadow-md border-2 border-b-0 transition-all text-sm font-medium flex items-center gap-2 min-w-max relative ${
-        data.isHighlighted
-          ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
-          : selected
+      onDoubleClick={() => setIsEditing(true)}
+      className={`px-4 py-3 rounded-t-lg shadow-md border-2 border-b-0 transition-all text-sm font-medium flex items-center gap-2 min-w-max relative ${data.isHighlighted
+        ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
+        : selected
           ? 'border-primary ring-2 ring-primary/50'
           : 'border-orange-500 text-orange-700 dark:text-orange-300'
-      }`}
+        }`}
     >
       <Handle type="target" position={Position.Top} />
-      
+
       {isEditing ? (
         <input
           autoFocus
@@ -66,7 +64,7 @@ export function DocumentNode({ data, selected }: any) {
           <span>{label}</span>
         </>
       )}
-      
+
       {/* Wavy bottom */}
       <svg
         className="absolute -bottom-1.5 left-0 right-0 w-full"
@@ -78,7 +76,7 @@ export function DocumentNode({ data, selected }: any) {
         <path d="M 0 4 Q 10 0 20 4 T 40 4 T 60 4 T 80 4 T 100 4" />
       </svg>
       <div className="absolute -bottom-2 left-0 right-0 h-2" />
-      
+
       <Handle type="source" position={Position.Bottom} />
     </div>
   )

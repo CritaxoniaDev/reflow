@@ -13,17 +13,15 @@ export function DecisionNode({ data, selected }: any) {
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing) {
-      setIsEditing(true)
-    }
+    setIsEditing(data.isEditing ?? false)
   }, [data.isEditing])
 
   const isHighlighted = data.isHighlighted
   const borderColor = isHighlighted
     ? '#facc15'
     : selected
-    ? 'var(--color-primary)'
-    : '#b45309'
+      ? 'var(--color-primary)'
+      : '#b45309'
 
   const handleBlur = () => {
     if (label.trim()) {
@@ -45,14 +43,16 @@ export function DecisionNode({ data, selected }: any) {
   }
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: '128px', height: '128px' }}>
+    <div
+      onDoubleClick={() => setIsEditing(true)}
+      className="relative flex items-center justify-center"
+      style={{ width: '128px', height: '128px' }}>
       <svg
         width="128"
         height="128"
         viewBox="0 0 128 128"
-        className={`absolute transition-all ${
-          isHighlighted ? 'scale-105' : selected ? 'scale-100' : 'scale-100'
-        }`}
+        className={`absolute transition-all ${isHighlighted ? 'scale-105' : selected ? 'scale-100' : 'scale-100'
+          }`}
         style={{
           filter: isHighlighted ? 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.5))' : 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.1))',
         }}
@@ -67,7 +67,7 @@ export function DecisionNode({ data, selected }: any) {
 
       <Handle type="target" position={Position.Top} />
       <Handle type="target" position={Position.Left} />
-      
+
       <div className="relative z-10 flex flex-col items-center gap-1">
         {isEditing ? (
           <input
@@ -82,20 +82,18 @@ export function DecisionNode({ data, selected }: any) {
           />
         ) : (
           <>
-            <GitBranch className={`size-5 ${
-              isHighlighted
-                ? 'text-yellow-400'
-                : selected
+            <GitBranch className={`size-5 ${isHighlighted
+              ? 'text-yellow-400'
+              : selected
                 ? 'text-primary'
                 : 'text-amber-700 dark:text-amber-300'
-            }`} />
-            <span className={`text-center text-xs ${
-              isHighlighted
-                ? 'text-yellow-400'
-                : selected
+              }`} />
+            <span className={`text-center text-xs ${isHighlighted
+              ? 'text-yellow-400'
+              : selected
                 ? 'text-primary'
                 : 'text-amber-700 dark:text-amber-300'
-            }`}>{label}</span>
+              }`}>{label}</span>
           </>
         )}
       </div>

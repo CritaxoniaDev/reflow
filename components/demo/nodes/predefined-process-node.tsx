@@ -13,9 +13,7 @@ export function PredefinedProcessNode({ data, selected }: any) {
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing) {
-      setIsEditing(true)
-    }
+    setIsEditing(data.isEditing ?? false)
   }, [data.isEditing])
 
   const handleBlur = () => {
@@ -40,22 +38,22 @@ export function PredefinedProcessNode({ data, selected }: any) {
   return (
     <>
       <Handle type="target" position={Position.Top} />
-      
+
       <div
-        className={`px-4 py-3 rounded-lg shadow-md border-2 transition-all text-sm font-medium flex items-center gap-2 min-w-max relative ${
-          data.isHighlighted
-            ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
-            : selected
+        onDoubleClick={() => setIsEditing(true)}
+        className={`px-4 py-3 rounded-lg shadow-md border-2 transition-all text-sm font-medium flex items-center gap-2 min-w-max relative ${data.isHighlighted
+          ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
+          : selected
             ? 'border-primary ring-2 ring-primary/50'
             : 'border-cyan-500 text-cyan-700 dark:text-cyan-300'
-        }`}
+          }`}
       >
         {/* Double vertical lines on left */}
         <div className="absolute left-0.5 top-0 bottom-0 flex flex-col justify-center gap-0.5">
           <div className="w-px h-1.5 bg-current opacity-50" />
           <div className="w-px h-1.5 bg-current opacity-50" />
         </div>
-        
+
         {isEditing ? (
           <input
             autoFocus
@@ -73,7 +71,7 @@ export function PredefinedProcessNode({ data, selected }: any) {
             <span>{label}</span>
           </>
         )}
-        
+
         {/* Double vertical lines on right */}
         <div className="absolute right-0.5 top-0 bottom-0 flex flex-col justify-center gap-0.5">
           <div className="w-px h-1.5 bg-current opacity-50" />
