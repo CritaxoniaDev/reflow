@@ -1,12 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import {
-  LayoutDashboard,
-  Users,
-  Settings,
-  LogOut,
   Bell,
   Search,
   Plus,
@@ -14,77 +8,13 @@ import {
   Zap,
   Workflow,
 } from 'lucide-react'
-import { createBrowserClient } from '@/packages/supabase-v1/client'
-import { gooeyToast } from 'goey-toast'
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
   SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarSeparator,
   SidebarTrigger,
 } from '@/packages/shadcn-v1/sidebar'
-import { Button } from '@/components/ui'
-import { Input } from '@/components/ui'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui'
+import { Button, Input, Kbd } from '@/components/ui'
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const [user, setUser] = useState<any>(null)
-
-  const handleLogout = async () => {
-    try {
-      const supabase = createBrowserClient()
-      await supabase.auth.signOut()
-      gooeyToast.success('Signed out', {
-        description: 'You have been signed out successfully.',
-      })
-      router.push('/')
-    } catch (error: any) {
-      gooeyToast.error('Logout failed', {
-        description: error.message,
-      })
-    }
-  }
-
-  const navigationItems = [
-    {
-      title: 'Dashboard',
-      icon: LayoutDashboard,
-      href: '#',
-      isActive: true,
-    },
-    {
-      title: 'My Flowcharts',
-      icon: Workflow,
-      href: '#',
-    },
-    {
-      title: 'Team',
-      icon: Users,
-      href: '#',
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      href: '#',
-    },
-  ]
-
   const recentFlowcharts = [
     {
       id: 1,
@@ -117,7 +47,7 @@ export default function DashboardPage() {
     {
       title: 'Team Members',
       value: '8',
-      icon: Users,
+      icon: Zap,
       color: 'bg-purple-500/10',
       textColor: 'text-purple-600',
     },
@@ -131,237 +61,113 @@ export default function DashboardPage() {
   ]
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader className="border-b border-sidebar-border">
-          <div className="flex items-center gap-2 px-2 py-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600">
-              <span className="text-sm font-bold text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
-                R
-              </span>
-            </div>
-            <span className="text-lg font-bold">Reflow</span>
-          </div>
-        </SidebarHeader>
-
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Main</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navigationItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      isActive={item.isActive}
-                      tooltip={item.title}
-                    >
-                      <a href={item.href} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarSeparator />
-
-          <SidebarGroup>
-            <SidebarGroupLabel>Resources</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <a href="#" className="flex items-center gap-2">
-                      <Workflow className="h-4 w-4" />
-                      <span>Templates</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>      
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <a href="#" className="flex items-center gap-2">
-                      <Bell className="h-4 w-4" />
-                      <span>Documentation</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <SidebarMenuButton className="flex items-center gap-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-blue-400 to-blue-600">
-                      <span className="text-xs font-bold text-white">U</span>
-                    </div>
-                    <span className="font-medium">Account</span>
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="right" align="end" className="w-56">
-                  <DropdownMenuItem>
-                    <span className="text-sm">Profile Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <span className="text-sm">Preferences</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                    <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-
-      <SidebarInset>
-        {/* Header */}
-        <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-16 items-center justify-between px-6 gap-4">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="md:hidden" />
-              <div className="hidden md:flex items-center">
-                <h1 className="text-2xl font-bold">Dashboard</h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex relative w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search flowcharts..."
-                  className="pl-10 bg-muted/50 border-0"
-                />
-              </div>
-
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-              </Button>
-
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                New Flowchart
-              </Button>
-            </div>
-          </div>
+    <SidebarInset>
+      {/* Main Content */}
+      <div className="flex-1 space-y-8 p-6 md:p-8">
+        {/* Welcome Section */}
+        <div className="space-y-2">
+          <h2 className="text-4xl font-bold tracking-tight" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>Welcome back!</h2>
+          <p className="text-muted-foreground">
+            Create, collaborate, and share flowcharts with your team in real-time.
+          </p>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 space-y-8 p-6 md:p-8">
-          {/* Welcome Section */}
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight">Welcome back!</h2>
-            <p className="text-muted-foreground">
-              Create, collaborate, and share flowcharts with your team in real-time.
-            </p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {stats.map((stat) => (
+            <div
+              key={stat.title}
+              className="rounded-lg border border-border bg-card p-6 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </p>
+                  <p className="text-3xl font-bold mt-2">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-lg ${stat.color}`}>
+                  <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent Flowcharts */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold">Recent Flowcharts</h3>
+            <Button variant="outline" size="sm">
+              View All
+            </Button>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {stats.map((stat) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recentFlowcharts.map((flowchart) => (
               <div
-                key={stat.title}
-                className="rounded-lg border border-border bg-card p-6 hover:shadow-md transition-shadow"
+                key={flowchart.id}
+                className="group rounded-lg border border-border bg-card p-6 hover:shadow-md transition-all hover:border-blue-500/50 cursor-pointer"
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {stat.title}
-                    </p>
-                    <p className="text-3xl font-bold mt-2">{stat.value}</p>
-                  </div>
-                  <div className={`p-3 rounded-lg ${stat.color}`}>
-                    <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
+                <div className="flex items-start justify-between mb-4">
+                  <Workflow className="h-8 w-8 text-blue-600" />
+                  <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <h4 className="font-semibold mb-2 group-hover:text-blue-600 transition-colors">
+                  {flowchart.title}
+                </h4>
+
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Updated {flowchart.updated}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-border">
+                    <div className="flex -space-x-2">
+                      {[...Array(flowchart.collaborators)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-xs font-bold text-white border-2 border-background"
+                        >
+                          {String.fromCharCode(65 + i)}
+                        </div>
+                      ))}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {flowchart.collaborators} collaborators
+                    </span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Recent Flowcharts */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold">Recent Flowcharts</h3>
-              <Button variant="outline" size="sm">
-                View All
+        {/* Quick Actions */}
+        <div className="rounded-lg border border-border bg-card p-6 space-y-4">
+          <h3 className="text-lg font-bold">Quick Actions</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { icon: Plus, label: 'Create New', color: 'bg-blue-500/10' },
+              { icon: Workflow, label: 'Browse Templates', color: 'bg-purple-500/10' },
+              { icon: Zap, label: 'Invite Team', color: 'bg-amber-500/10' },
+              { icon: Bell, label: 'Settings', color: 'bg-emerald-500/10' },
+            ].map((action) => (
+              <Button
+                key={action.label}
+                variant="outline"
+                className="h-auto flex-col gap-2 py-4"
+              >
+                <action.icon className="h-5 w-5" />
+                <span className="text-xs font-medium">{action.label}</span>
               </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentFlowcharts.map((flowchart) => (
-                <div
-                  key={flowchart.id}
-                  className="group rounded-lg border border-border bg-card p-6 hover:shadow-md transition-all hover:border-blue-500/50 cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <Workflow className="h-8 w-8 text-blue-600" />
-                    <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <h4 className="font-semibold mb-2 group-hover:text-blue-600 transition-colors">
-                    {flowchart.title}
-                  </h4>
-                  
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground">
-                      Updated {flowchart.updated}
-                    </p>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-border">
-                      <div className="flex -space-x-2">
-                        {[...Array(flowchart.collaborators)].map((_, i) => (
-                          <div
-                            key={i}
-                            className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-xs font-bold text-white border-2 border-background"
-                          >
-                            {String.fromCharCode(65 + i)}
-                          </div>
-                        ))}
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {flowchart.collaborators} collaborators
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="rounded-lg border border-border bg-card p-6 space-y-4">
-            <h3 className="text-lg font-bold">Quick Actions</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { icon: Plus, label: 'Create New', color: 'bg-blue-500/10' },
-                { icon: Workflow, label: 'Browse Templates', color: 'bg-purple-500/10' },
-                { icon: Users, label: 'Invite Team', color: 'bg-amber-500/10' },
-                { icon: Settings, label: 'Settings', color: 'bg-emerald-500/10' },
-              ].map((action) => (
-                <Button
-                  key={action.label}
-                  variant="outline"
-                  className="h-auto flex-col gap-2 py-4"
-                >
-                  <action.icon className="h-5 w-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </SidebarInset>
   )
 }

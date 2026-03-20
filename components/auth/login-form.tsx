@@ -7,13 +7,16 @@ import { ArrowRight, Mail } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { Input } from '@/components/ui'
 import { Label } from '@/components/ui'
+import { useSearchParams } from 'next/navigation'
 import { loginFormConfig, useSignInMutation, handleLoginSubmit } from '@/components/auth/_ts/login'
 
 export function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState('')
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
 
-  const signInMutation = useSignInMutation(router)
+  const signInMutation = useSignInMutation(router, redirectTo)
 
   const handleSubmit = (e: React.FormEvent) => {
     handleLoginSubmit(e, email, signInMutation)

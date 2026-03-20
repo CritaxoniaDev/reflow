@@ -13,21 +13,22 @@ export const loginFormConfig = {
   },
 }
 
-export const useSignInMutation = (router: any) => {
+export const useSignInMutation = (router: any, redirectTo: string = '/dashboard') => {
   return trpc.users.signIn.useMutation({
     onSuccess: async (data) => {
       gooeyToast.success('Magic link sent!', {
         description: 'Check your email to sign in.',
       })
 
-      // Store email in sessionStorage for verify page
+      // Store email and redirect in sessionStorage for verify page
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('login_email', data.email)
+        sessionStorage.setItem('login_redirect', redirectTo)
       }
 
       // Redirect to verify page (OTP already sent by server)
       setTimeout(() => {
-        router.push(`/auth/verify?email=${encodeURIComponent(data.email)}`)
+        router.push(`/auth/verify?email=${encodeURIComponent(data.email)}&redirect=${encodeURIComponent(redirectTo)}`)
       }, 1500)
     },
     onError: (error) => {

@@ -1,11 +1,21 @@
 export interface User {
   id: string
-  username: string
   email: string
-  token: string | null
-  token_expires_at: string | null
+  username: string
+  team_id: string | null
   created_at: string
   updated_at: string
+}
+
+export interface Team {
+  id: string
+  name: string
+  created_at: string
+  updated_at: string
+}
+
+export interface UserWithTeam extends User {
+  teams: Team | null
 }
 
 export interface Database {
@@ -21,14 +31,29 @@ export interface Database {
           id?: string
           created_at?: string
           updated_at?: string
+          team_id?: string | null
         }
         Update: {
           username?: string
           email?: string
           token?: string | null
           token_expires_at?: string | null
+          created_at?: string
+          updated_at?: string
+          team_id?: string | null
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: Team
+        Insert: {
+          name: string
           id?: string
           created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          name?: string
           updated_at?: string
         }
         Relationships: []

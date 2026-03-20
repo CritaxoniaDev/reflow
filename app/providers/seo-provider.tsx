@@ -14,7 +14,7 @@ export function SEOProvider({ children, seo }: { children: ReactNode; seo?: SEOD
     title: 'Reflow - Realtime Flowchart Creator',
     description: 'Reflow: a realtime flowchart creator with collaboration using React Flow. Create, design, and collaborate on flowcharts in real-time.',
     image: `${process.env.NEXT_PUBLIC_BASE_URL}/og-image.png`,
-    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://reflow.app',
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://reflow.vercel.app',
   }
 
   const meta = { ...defaultSEO, ...seo }

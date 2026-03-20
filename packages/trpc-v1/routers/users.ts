@@ -79,7 +79,7 @@ export const usersRouter = router({
     }),
 
   // Verify OTP and create profile (all server-side)
-  verifyAndCreateProfile: publicProcedure 
+  verifyAndCreateProfile: publicProcedure
     .input(z.object({
       email: z.string().email(),
       code: z.string(), // Not used - OTP already verified client-side
@@ -186,6 +186,51 @@ export const usersRouter = router({
       }
     }),
 
+  logout: publicProcedure.mutation(async ({ ctx }) => {
+    try {
+      const { error } = await ctx.supabase.auth.signOut()
+      if (error) throw error
+      return { success: true, message: 'Signed out successfully' }
+    } catch (error: any) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: error.message,
+      })
+    }
+  }),
+
+  getCurrentUserWithTeam: protectedProcedure
+  .query(async ({ ctx }) => {
+    if (!ctx.user) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'User must be authenticated',
+      })
+    }
+
+    try {
+      const user = await userService.getUserById(ctx.user.id)
+      
+      if (!user) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'User not found',
+        })
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        team: user.teams || { id: null, name: 'Personal', created_at: '', updated_at: '' },
+      }
+    } catch (error: any) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch user info',
+      })
+    }
+  }),
 
   // Get current authenticated user
   getCurrentUser: protectedProcedure

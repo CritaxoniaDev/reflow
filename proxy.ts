@@ -17,7 +17,7 @@ export async function proxy(request: NextRequest) {
         getAll() {
           const cookieHeader = request.headers.get('cookie') || ''
           const cookies: Array<{ name: string; value: string }> = []
-          
+
           if (cookieHeader) {
             cookieHeader.split('; ').forEach(cookie => {
               const [name, value] = cookie.split('=')
@@ -26,7 +26,7 @@ export async function proxy(request: NextRequest) {
               }
             })
           }
-          
+
           return cookies
         },
         setAll(cookiesToSet) {
@@ -55,6 +55,10 @@ export async function proxy(request: NextRequest) {
   if (isProtectedRoute && !user) {
     console.log('Middleware: No user found for protected route, redirecting to login')
     const loginUrl = new URL('/auth/login', request.url)
+
+    // Add redirect query parameter with the original URL
+    loginUrl.searchParams.set('redirect', request.nextUrl.pathname + request.nextUrl.search)
+
     return NextResponse.redirect(loginUrl)
   }
 
