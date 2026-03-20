@@ -60,7 +60,26 @@ export const usersRouter = router({
     .mutation(async ({ input }) => {
       const normalizedEmail = input.email.toLowerCase()
 
-      // Send magic link (works for existing or new users after they verify)
+      // Check if user exists in database for login flow
+      try {
+        const existingUser = await userService.getUserByEmail(normalizedEmail)
+
+        if (!existingUser) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Email not found. Please register first.',
+          })
+        }
+      } catch (err: any) {
+        if (err instanceof TRPCError) throw err
+        console.error('Error checking user:', err)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to verify email. Please try again.',
+        })
+      }
+
+      // Send magic link only if user exists
       try {
         await userService.signInWithOtp(normalizedEmail)
       } catch (err: any) {
@@ -200,37 +219,37 @@ export const usersRouter = router({
   }),
 
   getCurrentUserWithTeam: protectedProcedure
-  .query(async ({ ctx }) => {
-    if (!ctx.user) {
-      throw new TRPCError({
-        code: 'UNAUTHORIZED',
-        message: 'User must be authenticated',
-      })
-    }
-
-    try {
-      const user = await userService.getUserById(ctx.user.id)
-      
-      if (!user) {
+    .query(async ({ ctx }) => {
+      if (!ctx.user) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'User not found',
+          code: 'UNAUTHORIZED',
+          message: 'User must be authenticated',
         })
       }
 
-      return {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        team: user.teams || { id: null, name: 'Personal', created_at: '', updated_at: '' },
+      try {
+        const user = await userService.getUserById(ctx.user.id)
+
+        if (!user) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'User not found',
+          })
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          team: user.teams || { id: null, name: 'Personal', created_at: '', updated_at: '' },
+        }
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch user info',
+        })
       }
-    } catch (error: any) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to fetch user info',
-      })
-    }
-  }),
+    }),
 
   // Get current authenticated user
   getCurrentUser: protectedProcedure
