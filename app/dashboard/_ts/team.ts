@@ -66,3 +66,34 @@ export const useInviteMember = () => {
     },
   })
 }
+
+export const useJoinTeamByCode = () => {
+  const utils = trpc.useUtils()
+  
+  return trpc.teams.joinTeamByCode.useMutation({
+    onSuccess: (data) => {
+      gooeyToast.success('Success!', {
+        description: data.message,
+      })
+      // Reload team data
+      utils.users.getCurrentUserWithTeam.invalidate()
+    },
+    onError: (error) => {
+      gooeyToast.error('Failed to join team', {
+        description: error.message,
+      })
+    },
+  })
+}
+
+export const useGetTeamInviteCode = (enabled = false) => {
+  return trpc.teams.getTeamInviteCode.useQuery(undefined, { 
+    enabled 
+  })
+}
+
+export const useGetTeamMembers = (enabled = false) => {
+  return trpc.teams.getTeamMembers.useQuery(undefined, { 
+    enabled 
+  })
+}

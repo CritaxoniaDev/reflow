@@ -241,12 +241,14 @@ export const usersRouter = router({
           id: user.id,
           email: user.email,
           username: user.username,
-          team: user.teams || { id: null, name: 'Personal', created_at: '', updated_at: '' },
+          teamId: user.team_id,
+          teamName: user.teams?.name || 'Personal',
         }
       } catch (error: any) {
+        console.error('getCurrentUserWithTeam error:', error)  // ADD THIS
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch user info',
+          message: error.message || 'Failed to fetch user info',  // INCLUDE ERROR MESSAGE
         })
       }
     }),

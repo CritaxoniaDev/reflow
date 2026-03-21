@@ -6,8 +6,8 @@ export function useAccountInfo() {
   return {
     userId: accountInfo?.id,
     username: accountInfo?.username || 'User',
-    teamName: accountInfo?.team?.name || 'Personal',
-    teamId: accountInfo?.team?.id || null,
+    teamName: accountInfo?.teamName || 'Personal',
+    teamId: accountInfo?.teamId || null,
     isLoading,
   }
 }

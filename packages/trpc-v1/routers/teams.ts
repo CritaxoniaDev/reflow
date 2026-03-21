@@ -125,4 +125,120 @@ export const teamsRouter = router({
         })
       }
     }),
+
+  joinTeamByCode: protectedProcedure
+    .input(z.object({ code: z.string().min(16) }))
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User must be authenticated',
+        })
+      }
+
+      try {
+        // Check if user already has a team
+        const user = await userService.getUserById(ctx.user.id)
+        if (user?.team_id) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'You already have a team. Leave it first to join another.',
+          })
+        }
+
+        // Find team by invite code
+        const team = await teamService.getTeamByInviteCode(input.code)
+        if (!team) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Invalid team code. Please check and try again.',
+          })
+        }
+
+        // Add user to team
+        // @ts-ignore
+        await teamService.joinTeamByCode(ctx.user.id, team.id)
+
+        return {
+          success: true,
+          // @ts-ignore
+          message: `Joined ${team.name} successfully!`,
+          team: {
+            // @ts-ignore
+            id: team.id,
+            // @ts-ignore
+            name: team.name,
+          },
+        }
+      } catch (error: any) {
+        if (error instanceof TRPCError) throw error
+        console.error('Join team error:', error)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message || 'Failed to join team',
+        })
+      }
+    }),
+
+  getTeamInviteCode: protectedProcedure
+    .query(async ({ ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User must be authenticated',
+        })
+      }
+
+      try {
+        const user = await userService.getUserById(ctx.user.id)
+        if (!user?.team_id) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'No team found',
+          })
+        }
+
+        const team = await teamService.getTeamWithCode(user.team_id)
+        return {
+          teamId: team.id,
+          teamName: team.name,
+          inviteCode: team.plainCode,
+        }
+      } catch (error: any) {
+        if (error instanceof TRPCError) throw error
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch team invite code',
+        })
+      }
+    }),
+
+  getTeamMembers: protectedProcedure
+    .query(async ({ ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User must be authenticated',
+        })
+      }
+
+      try {
+        const user = await userService.getUserById(ctx.user.id)
+        if (!user?.team_id) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'No team found',
+          })
+        }
+
+        const members = await teamService.getTeamMembers(user.team_id)
+        return members
+      } catch (error: any) {
+        if (error instanceof TRPCError) throw error
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch team members',
+        })
+      }
+    }),
 })
