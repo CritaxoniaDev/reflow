@@ -4,7 +4,7 @@ import { Handle, Position } from 'reactflow'
 import { GitBranch } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
-export function DecisionNode({ data, selected }: any) {
+export function DecisionNode({ id, data, selected }: any) {
   const [label, setLabel] = useState(data.label)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -24,8 +24,10 @@ export function DecisionNode({ data, selected }: any) {
       : '#b45309'
 
   const handleBlur = () => {
+    console.log('[NODE] DecisionNode handleBlur:', { id, label, oldLabel: data.label })
     if (label.trim()) {
-      data.onLabelChange(data.id || 'unknown', label)
+      console.log('[NODE] Calling onLabelChange:', { id, label })
+      data.onLabelChange?.(id, label)
     } else {
       setLabel(data.label)
     }
@@ -44,7 +46,10 @@ export function DecisionNode({ data, selected }: any) {
 
   return (
     <div
-      onDoubleClick={() => setIsEditing(true)}
+      onDoubleClick={() => {
+        console.log('[NODE] DecisionNode double clicked:', id)
+        setIsEditing(true)
+      }}
       className="relative flex items-center justify-center"
       style={{ width: '128px', height: '128px' }}>
       <svg

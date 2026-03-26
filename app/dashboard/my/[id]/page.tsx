@@ -1,14 +1,10 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React from 'react'
 import { ChevronLeft, Save } from 'lucide-react'
 import ReactFlow, {
     Node,
     Edge,
-    addEdge,
-    useNodesState,
-    useEdgesState,
-    Connection,
     Background,
     Controls,
     useReactFlow,
@@ -20,9 +16,9 @@ import ReactFlow, {
 import 'reactflow/dist/style.css'
 import { AuthNavHead } from '@/components/common/auth-nav-head'
 import { SidebarInset } from '@/packages/shadcn-v1/sidebar'
-import { useRouter, useParams } from 'next/navigation'
-import { useGetFlowchart, useUpdateFlowchart } from '../../_ts/flowcharts'
-import type { Flowchart } from '@supabase/database/types'
+import { Cursor, CursorPointer, CursorBody, CursorName } from '@/components/kibo-ui/cursor'
+import { useRouter } from 'next/navigation'
+import { useFlowchartEditor, CURSOR_COLORS } from '../../_ts/flowchart-id'
 import { Toolbox } from '@/components/demo/toolbox'
 import { ProcessNode } from '@/components/demo/nodes/process-node'
 import { StartEndNode } from '@/components/demo/nodes/start-end-node'
@@ -135,134 +131,43 @@ const edgeTypes = {
 
 function FlowchartEditor() {
     const router = useRouter()
-    const params = useParams()
-    const id = params.id as string
-    const reactFlowInstance = useReactFlow()
-    const reactFlowWrapper = useRef(null)
+    const {
+        id,
+        name,
+        setName,
+        nodes,
+        edges,
+        onNodesChange,
+        onEdgesChange,
+        remoteCursors,
+        mousePosition,
+        isLoading,
+        reactFlowWrapper,
+        updateMutation,
+        onConnect,
+        handleSave,
+        handleNodesChange,
+        handleEdgesChange,
+        onDragOver,
+        onDrop,
+        handleNodeDoubleClick,
+        handleKeyDown,
+        handleMouseMove,
+        teamName,              
+        isTeamFlowchart,      
+    } = useFlowchartEditor()
 
-    const [name, setName] = useState('')
-    const [nodes, setNodes, onNodesChange] = useNodesState([])
-    const [edges, setEdges, onEdgesChange] = useEdgesState([])
-
-    const { data: flowchart, isLoading } = useGetFlowchart(id) as { data: Flowchart | undefined; isLoading: boolean }
-    const updateMutation = useUpdateFlowchart()
-
-    React.useEffect(() => {
-        if (flowchart) {
-            setName(flowchart.name)
-            if (flowchart.content?.nodes) {
-                // Add onLabelChange to all loaded nodes
-                const nodesWithCallbacks = flowchart.content.nodes.map((node: Node) => ({
-                    ...node,
-                    data: {
-                        ...node.data,
-                        isEditing: false,  // ← ADD THIS
-                        onLabelChange: (nodeId: string, newLabel: string) => {
-                            setNodes((nds) =>
-                                nds.map((n) =>
-                                    n.id === nodeId
-                                        ? { ...n, data: { ...n.data, label: newLabel, isEditing: false } }
-                                        : n
-                                )
-                            )
-                        },
-                    },
-                }))
-                setNodes(nodesWithCallbacks)
-            }
-            if (flowchart.content?.edges) {
-                setEdges(flowchart.content.edges)
-            }
-        }
-    }, [flowchart, setNodes, setEdges])
-
-    const onConnect = useCallback(
-        (connection: Connection) =>
-            setEdges((eds) =>
-                addEdge({ ...connection, type: 'animated' }, eds)
-            ),
-        [setEdges],
-    )
-
-    const handleSave = async () => {
-        if (!name.trim()) return
-        await updateMutation.mutateAsync({
-            id,
-            name,
-            content: { nodes, edges },
-        })
-    }
-
-    const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault()
-        event.dataTransfer.dropEffect = 'move'
-    }, [])
-
-    const onDrop = useCallback(
-        (event: React.DragEvent<HTMLDivElement>) => {
-            event.preventDefault()
-
-            const reactFlowBounds = (reactFlowWrapper.current as any)?.getBoundingClientRect()
-            const appData = JSON.parse(event.dataTransfer.getData('application/reactflow'))
-
-            if (typeof appData === 'undefined' || !appData) {
-                return
-            }
-
-            const position = reactFlowInstance?.project({
-                x: event.clientX - (reactFlowBounds?.left || 0),
-                y: event.clientY - (reactFlowBounds?.top || 0),
-            })
-
-            const newNode: Node = {
-                id: `node-${Date.now()}`,
-                type: appData.nodeType,
-                data: {
-                    label: appData.label,
-                    isEditing: false,  // ← ADD THIS
-                    onLabelChange: (nodeId: string, newLabel: string) => {
-                        setNodes((nds) =>
-                            nds.map((node) =>
-                                node.id === nodeId
-                                    ? { ...node, data: { ...node.data, label: newLabel, isEditing: false } }
-                                    : node
-                            )
-                        )
-                    },
-                },
-                position: position || { x: 0, y: 0 },
-            }
-
-            setNodes((nds) => [...nds, newNode])
-        },
-        [reactFlowInstance, setNodes]
-    )
-
-    const handleNodeDoubleClick = useCallback(
-        (event: React.MouseEvent, node: Node) => {
-            setNodes((nds) =>
-                nds.map((n) =>
-                    n.id === node.id ? { ...n, data: { ...n.data, isEditing: true } } : n
-                )
-            )
-        },
-        [setNodes]
-    )
-
-    const handleKeyDown = useCallback(
-        (event: React.KeyboardEvent) => {
-            if (event.key === 'Delete') {
-                setNodes((nds) => nds.filter((node) => !node.selected))
-                setEdges((eds) => eds.filter((edge) => !edge.selected))
-            }
-        },
-        [setNodes, setEdges]
-    )
+    // Convert remoteCursors to activeMembers format
+    const activeMembers = Array.from(remoteCursors.values()).map((cursor) => ({
+        userId: cursor.userId,
+        username: cursor.username,
+        color: cursor.color,
+    }))
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p className="text-muted-foreground">Loading flowchart...</p>
+                <div className="text-gray-500">Loading flowchart...</div>
             </div>
         )
     }
@@ -276,6 +181,9 @@ function FlowchartEditor() {
                 onBack={() => router.back()}
                 onSave={handleSave}
                 isSaving={updateMutation.isPending}
+                teamName={teamName}
+                isTeamFlowchart={isTeamFlowchart}
+                activeMembers={activeMembers}
             />
 
             {/* Canvas */}
@@ -285,22 +193,34 @@ function FlowchartEditor() {
                 onDragOver={onDragOver}
                 onDrop={onDrop}
                 onKeyDown={handleKeyDown}
+                onMouseMove={handleMouseMove}
                 tabIndex={0}
             >
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
-                    nodeTypes={nodeTypes}
-                    edgeTypes={edgeTypes}
-                    onNodesChange={onNodesChange}
+                    onNodesChange={handleNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     onNodeDoubleClick={handleNodeDoubleClick}
+                    nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
                     fitView
                 >
                     <Background />
                     <Controls />
                 </ReactFlow>
+
+                {/* Remote cursors */}
+                {Array.from(remoteCursors.values()).map((cursor) => (
+                    // @ts-expect-error
+                    <Cursor key={cursor.userId} x={cursor.x} y={cursor.y} color={cursor.color}>
+                        <CursorPointer />
+                        <CursorBody />
+                        <CursorName>{cursor.username}</CursorName>
+                    </Cursor>
+                ))}
+
                 <Toolbox />
             </div>
         </div>

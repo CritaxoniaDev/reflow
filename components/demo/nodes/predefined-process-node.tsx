@@ -1,10 +1,10 @@
 'use client'
 
 import { Handle, Position } from 'reactflow'
-import { Code2 } from 'lucide-react'
+import { Box } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
-export function PredefinedProcessNode({ data, selected }: any) {
+export function PredefinedProcessNode({ id, data, selected }: any) {
   const [label, setLabel] = useState(data.label)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -17,8 +17,10 @@ export function PredefinedProcessNode({ data, selected }: any) {
   }, [data.isEditing])
 
   const handleBlur = () => {
+    console.log('[NODE] PredefinedProcessNode handleBlur:', { id, label, oldLabel: data.label })
     if (label.trim()) {
-      data.onLabelChange(data.id || 'unknown', label)
+      console.log('[NODE] Calling onLabelChange:', { id, label })
+      data.onLabelChange?.(id, label)
     } else {
       setLabel(data.label)
     }
@@ -40,20 +42,21 @@ export function PredefinedProcessNode({ data, selected }: any) {
       <Handle type="target" position={Position.Top} />
 
       <div
-        onDoubleClick={() => setIsEditing(true)}
-        className={`px-4 py-3 rounded-lg shadow-md border-2 transition-all text-sm font-medium flex items-center gap-2 min-w-max relative ${data.isHighlighted
-          ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
-          : selected
-            ? 'border-primary ring-2 ring-primary/50'
-            : 'border-cyan-500 text-cyan-700 dark:text-cyan-300'
+        onDoubleClick={() => {
+          console.log('[NODE] PredefinedProcessNode double clicked:', id)
+          setIsEditing(true)
+        }}
+        className={`px-4 py-3 rounded-md shadow-md border-2 transition-all text-sm font-medium flex items-center gap-2 ${data.isHighlighted
+            ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
+            : selected
+              ? 'border-primary ring-2 ring-primary/50'
+              : 'border-orange-600 text-orange-700 dark:text-orange-300'
           }`}
+        style={{
+          borderTop: '4px solid currentColor',
+          borderBottom: '4px solid currentColor',
+        }}
       >
-        {/* Double vertical lines on left */}
-        <div className="absolute left-0.5 top-0 bottom-0 flex flex-col justify-center gap-0.5">
-          <div className="w-px h-1.5 bg-current opacity-50" />
-          <div className="w-px h-1.5 bg-current opacity-50" />
-        </div>
-
         {isEditing ? (
           <input
             autoFocus
@@ -63,20 +66,14 @@ export function PredefinedProcessNode({ data, selected }: any) {
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
-            className="bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-600 rounded px-2 py-1 outline-none text-cyan-700 dark:text-cyan-300 text-sm font-medium w-32"
+            className="bg-orange-50 dark:bg-orange-900/30 border border-orange-600 rounded px-2 py-1 outline-none text-orange-700 dark:text-orange-300 text-sm font-medium w-28"
           />
         ) : (
           <>
-            <Code2 className="size-4" />
+            <Box className="size-4" />
             <span>{label}</span>
           </>
         )}
-
-        {/* Double vertical lines on right */}
-        <div className="absolute right-0.5 top-0 bottom-0 flex flex-col justify-center gap-0.5">
-          <div className="w-px h-1.5 bg-current opacity-50" />
-          <div className="w-px h-1.5 bg-current opacity-50" />
-        </div>
       </div>
 
       <Handle type="source" position={Position.Bottom} />

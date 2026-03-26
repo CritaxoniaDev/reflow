@@ -71,7 +71,43 @@ export default function DashboardLayout({
     const pathname = usePathname()
     const { handleLogout, isLoading } = useLogout()
     const { username, teamName } = useAccountInfo()
-    
+
+    function SidebarFooterContent() {
+        const { state } = useSidebar()
+
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger suppressHydrationWarning>
+                    <div className="w-full cursor-pointer rounded-lg border border-border bg-card p-3 hover:bg-accent transition-colors" suppressHydrationWarning>
+                        <div className={`flex items-center ${state === 'collapsed' ? 'justify-center' : 'gap-3'}`} suppressHydrationWarning>
+                            <div className={`flex items-center justify-center rounded-md bg-gradient-to-br from-blue-400 to-blue-600 flex-shrink-0 transition-all ${state === 'collapsed' ? 'h-5 w-5' : 'h-8 w-8'}`}>
+                                <span className={`font-bold text-white ${state === 'collapsed' ? 'text-[10px]' : 'text-xs'}`}>{username.charAt(0).toUpperCase()}</span>
+                            </div>
+                            {state === 'expanded' && (
+                                <div className="flex flex-col text-left min-w-0 flex-1">
+                                    <span className="font-medium truncate text-sm">{username}</span>
+                                    <span className="text-xs text-muted-foreground truncate">{teamName}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="right" align="end" className="w-56">
+                    <DropdownMenuItem onClick={() => router.push('/dashboard/settings/profile')}>
+                        <span className="text-sm">Profile Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/dashboard/settings/preferences')}>
+                        <span className="text-sm">Preferences</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout} disabled={isLoading} className="text-red-600">
+                        <LogOut className="h-4 w-4" />
+                        <span>{isLoading ? 'Signing out...' : 'Sign Out'}</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        )
+    }
+
     // Enable realtime sync for all dashboard pages
     useSupabaseRealtime()
 
@@ -146,34 +182,8 @@ export default function DashboardLayout({
                     </SidebarGroup>
                 </SidebarContent>
 
-                <SidebarFooter className="p-0 pb-2 px-2" suppressHydrationWarning>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger suppressHydrationWarning>
-                            <div className="w-full cursor-pointer" suppressHydrationWarning>
-                                <div className="peer/menu-button group/menu-button w-full overflow-hidden rounded-md px-4 py-3 text-sm outline-none ring-ring hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 flex items-center gap-2" suppressHydrationWarning>
-                                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-blue-400 to-blue-600">
-                                        <span className="text-xs font-bold text-white">{username.charAt(0).toUpperCase()}</span>
-                                    </div>
-                                    <div className="flex flex-col text-left min-w-0">
-                                        <span className="font-medium truncate">{username}</span>
-                                        <span className="text-xs text-muted-foreground">{teamName}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="right" align="end" className="w-56">
-                            <DropdownMenuItem onClick={() => router.push('/dashboard/settings/profile')}>
-                                <span className="text-sm">Profile Settings</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => router.push('/dashboard/settings/preferences')}>
-                                <span className="text-sm">Preferences</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleLogout} disabled={isLoading} className="text-red-600">
-                                <LogOut className="h-4 w-4" />
-                                <span>{isLoading ? 'Signing out...' : 'Sign Out'}</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                <SidebarFooter className="p-2 mb-2" suppressHydrationWarning>
+                    <SidebarFooterContent />
                 </SidebarFooter>
             </Sidebar>
 

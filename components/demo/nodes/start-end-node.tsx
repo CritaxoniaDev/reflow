@@ -4,8 +4,9 @@ import { Handle, Position } from 'reactflow'
 import { Circle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
-export function StartEndNode({ data, selected }: any) {
-  const isStart = data.isStart ?? data.label === 'Start'
+export function StartEndNode({ id, data, selected }: any) {
+  // Use only data.isStart, don't check label
+  const isStart = data.isStart === true
   const [label, setLabel] = useState(data.label)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -18,8 +19,10 @@ export function StartEndNode({ data, selected }: any) {
   }, [data.isEditing])
 
   const handleBlur = () => {
+    console.log('[NODE] StartEndNode handleBlur:', { id, label, oldLabel: data.label, isStart })
     if (label.trim()) {
-      data.onLabelChange(data.id || 'unknown', label)
+      console.log('[NODE] Calling onLabelChange:', { id, label })
+      data.onLabelChange?.(id, label)
     } else {
       setLabel(data.label)
     }
@@ -41,7 +44,10 @@ export function StartEndNode({ data, selected }: any) {
       {!isStart && <Handle type="target" position={Position.Top} />}
 
       <div
-        onDoubleClick={() => setIsEditing(true)}
+        onDoubleClick={() => {
+          console.log('[NODE] StartEndNode double clicked:', id)
+          setIsEditing(true)
+        }}
         className={`px-6 py-3 rounded-full shadow-md border-2 transition-all font-medium text-sm flex items-center gap-2 ${data.isHighlighted
           ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-110'
           : selected

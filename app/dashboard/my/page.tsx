@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Edit2, Trash2, Clock, Workflow } from 'lucide-react'
+import { Plus, Edit2, Trash2, Clock, Workflow, Users } from 'lucide-react'
 import {
     Button,
     Card,
@@ -13,28 +13,41 @@ import {
     AlertDialogContent,
     AlertDialogAction,
     AlertDialogCancel,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
 } from '@/components/ui'
 import { SidebarInset } from '@/packages/shadcn-v1/sidebar'
 import { useRouter } from 'next/navigation'
 import { useGetFlowcharts, useCreateFlowchart, useDeleteFlowchart } from '../_ts/flowcharts'
+import { useAccountInfo } from '../_ts/account'
 
 export default function MyFlowchartsPage() {
     const router = useRouter()
+    const { teamName } = useAccountInfo()
     const [isOpen, setIsOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [selectedId, setSelectedId] = useState<string | null>(null)
-    const [formData, setFormData] = useState({ name: '' })
+    const [formData, setFormData] = useState({ name: '', isTeam: false })
 
-    const { data: flowcharts = [], isLoading } = useGetFlowcharts()
+    const { data: flowchartsData, isLoading } = useGetFlowcharts()
     const createMutation = useCreateFlowchart()
     const deleteMutation = useDeleteFlowchart()
+
+    const personalFlowcharts = flowchartsData?.personal || []
+    const teamFlowcharts = flowchartsData?.team || []
+    const hasTeam = Boolean(teamName && teamName !== 'Personal')
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!formData.name.trim()) return
 
-        await createMutation.mutateAsync({ name: formData.name })
-        setFormData({ name: '' })
+        await createMutation.mutateAsync({
+            name: formData.name,
+            isTeam: formData.isTeam && hasTeam,
+        })
+        setFormData({ name: '', isTeam: false })
         setIsOpen(false)
     }
 
@@ -52,6 +65,53 @@ export default function MyFlowchartsPage() {
             year: 'numeric',
         })
     }
+
+    const FlowchartCard = ({ flowchart, isTeam = false }: any) => (
+        <Card
+            key={flowchart.id}
+            className="p-4 cursor-pointer hover:shadow-lg hover:border-blue-400 transition-all"
+        >
+            <div
+                onClick={() => router.push(`/dashboard/my/${flowchart.id}`)}
+                className="space-y-3"
+            >
+                <div className="flex items-start justify-between">
+                    <h3 className="font-semibold line-clamp-2 flex-1">{flowchart.name}</h3>
+                    {isTeam && (
+                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded ml-2 whitespace-nowrap">
+                            Team
+                        </span>
+                    )}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    Updated {formatDate(flowchart.updated_at)}
+                </div>
+            </div>
+
+            <div className="flex gap-2 mt-4 pt-4 border-t">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => router.push(`/dashboard/my/${flowchart.id}`)}
+                >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setSelectedId(flowchart.id)
+                        setIsDeleteOpen(true)
+                    }}
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+            </div>
+        </Card>
+    )
 
     return (
         <SidebarInset>
@@ -90,7 +150,7 @@ export default function MyFlowchartsPage() {
                                             id="flowchart-name"
                                             placeholder="Enter flowchart name"
                                             value={formData.name}
-                                            onChange={(e) => setFormData({ name: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             disabled={createMutation.isPending}
                                             maxLength={100}
                                         />
@@ -98,6 +158,23 @@ export default function MyFlowchartsPage() {
                                             Max 100 characters
                                         </p>
                                     </div>
+
+                                    {hasTeam && (
+                                        <div className="space-y-2">
+                                            <Label className="flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isTeam}
+                                                    onChange={(e) => setFormData({ ...formData, isTeam: e.target.checked })}
+                                                    className="rounded"
+                                                />
+                                                <span>Create for team</span>
+                                            </Label>
+                                            <p className="text-xs text-muted-foreground">
+                                                Team members can view and collaborate on this flowchart
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <Button
                                         type="submit"
@@ -112,12 +189,12 @@ export default function MyFlowchartsPage() {
                     </Dialog>
                 </div>
 
-                {/* Flowcharts Grid */}
+                {/* Flowcharts Content */}
                 {isLoading ? (
                     <div className="text-center py-12">
                         <p className="text-muted-foreground">Loading your flowcharts...</p>
                     </div>
-                ) : flowcharts.length === 0 ? (
+                ) : personalFlowcharts.length === 0 && teamFlowcharts.length === 0 ? (
                     <div className="flex items-center justify-center py-12">
                         <Card className="p-12 border-dashed max-w-md w-full">
                             <div className="text-center space-y-4">
@@ -134,47 +211,49 @@ export default function MyFlowchartsPage() {
                         </Card>
                     </div>
                 ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {flowcharts.map((flowchart: any) => (
-                            <Card
-                                key={flowchart.id}
-                                className="p-4 cursor-pointer hover:shadow-lg hover:border-blue-400 transition-all"
-                            >
-                                <div
-                                    onClick={() => router.push(`/dashboard/my/${flowchart.id}`)}
-                                    className="space-y-3"
-                                >
-                                    <h3 className="font-semibold line-clamp-2">{flowchart.name}</h3>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <Clock className="h-3 w-3" />
-                                        Updated {formatDate(flowchart.updated_at)}
-                                    </div>
-                                </div>
+                    <Tabs defaultValue="personal" className="w-full">
+                        <TabsList>
+                            <TabsTrigger value="personal">
+                                My Flowcharts ({personalFlowcharts.length})
+                            </TabsTrigger>
+                            {hasTeam && (
+                                <TabsTrigger value="team">
+                                    <Users className="h-4 w-4 mr-2" />
+                                    Team Flowcharts ({teamFlowcharts.length})
+                                </TabsTrigger>
+                            )}
+                        </TabsList>
 
-                                <div className="flex gap-2 mt-4 pt-4 border-t">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1"
-                                        onClick={() => router.push(`/dashboard/my/${flowchart.id}`)}
-                                    >
-                                        <Edit2 className="h-4 w-4 mr-2" />
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setSelectedId(flowchart.id)
-                                            setIsDeleteOpen(true)
-                                        }}
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                        <TabsContent value="personal" className="mt-6">
+                            {personalFlowcharts.length === 0 ? (
+                                <Card className="p-8 border-dashed text-center">
+                                    <p className="text-muted-foreground">No personal flowcharts yet</p>
+                                </Card>
+                            ) : (
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    {personalFlowcharts.map((fc: any) => (
+                                        <FlowchartCard key={fc.id} flowchart={fc} />
+                                    ))}
                                 </div>
-                            </Card>
-                        ))}
-                    </div>
+                            )}
+                        </TabsContent>
+
+                        {hasTeam && (
+                            <TabsContent value="team" className="mt-6">
+                                {teamFlowcharts.length === 0 ? (
+                                    <Card className="p-8 border-dashed text-center">
+                                        <p className="text-muted-foreground">No team flowcharts yet</p>
+                                    </Card>
+                                ) : (
+                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                        {teamFlowcharts.map((fc: any) => (
+                                            <FlowchartCard key={fc.id} flowchart={fc} isTeam />
+                                        ))}
+                                    </div>
+                                )}
+                            </TabsContent>
+                        )}
+                    </Tabs>
                 )}
 
                 {/* Delete Alert */}

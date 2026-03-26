@@ -4,7 +4,7 @@ import { Handle, Position } from 'reactflow'
 import { FileText } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
-export function ProcessNode({ data, selected }: any) {
+export function ProcessNode({ id, data, selected }: any) {
   const [label, setLabel] = useState(data.label)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -17,8 +17,10 @@ export function ProcessNode({ data, selected }: any) {
   }, [data.isEditing])
 
   const handleBlur = () => {
+    console.log('[NODE] ProcessNode handleBlur:', { id, label, oldLabel: data.label })
     if (label.trim()) {
-      data.onLabelChange(data.id || 'unknown', label)
+      console.log('[NODE] Calling onLabelChange:', { id, label })
+      data.onLabelChange?.(id, label)
     } else {
       setLabel(data.label)
     }
@@ -40,7 +42,10 @@ export function ProcessNode({ data, selected }: any) {
       <Handle type="target" position={Position.Top} />
 
       <div
-        onDoubleClick={() => setIsEditing(true)}
+        onDoubleClick={() => {
+          console.log('[NODE] ProcessNode double clicked:', id)
+          setIsEditing(true)
+        }}
         className={`px-4 py-3 rounded-lg shadow-md border-2 transition-all text-sm font-medium flex items-center gap-2 ${data.isHighlighted
             ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
             : selected

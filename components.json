@@ -24,6 +24,7 @@
   "registries": {
     "@magicui": "https://magicui.design/r/{name}",
     "@aceternity": "https://ui.aceternity.com/registry/{name}.json",
-    "@uitripled": "https://ui.tripled.work/r/{name}"
+    "@uitripled": "https://ui.tripled.work/r/{name}",
+    "@kibo-ui": "https://www.kibo-ui.com/r/{name}.json"
   }
 }

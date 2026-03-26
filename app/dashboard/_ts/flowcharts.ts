@@ -67,3 +67,7 @@ export const useDeleteFlowchart = () => {
     },
   })
 }
+
+export const useBroadcastFlowchartChange = () => {
+  return trpc.realtime.broadcastFlowchartChange.useMutation()
+}

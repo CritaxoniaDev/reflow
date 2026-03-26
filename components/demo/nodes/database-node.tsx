@@ -4,7 +4,7 @@ import { Handle, Position } from 'reactflow'
 import { Database } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
-export function DatabaseNode({ data, selected }: any) {
+export function DatabaseNode({ id, data, selected }: any) {
   const [label, setLabel] = useState(data.label)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -17,8 +17,10 @@ export function DatabaseNode({ data, selected }: any) {
   }, [data.isEditing])
 
   const handleBlur = () => {
+    console.log('[NODE] DatabaseNode handleBlur:', { id, label, oldLabel: data.label })
     if (label.trim()) {
-      data.onLabelChange(data.id || 'unknown', label)
+      console.log('[NODE] Calling onLabelChange:', { id, label })
+      data.onLabelChange?.(id, label)
     } else {
       setLabel(data.label)
     }
@@ -36,28 +38,21 @@ export function DatabaseNode({ data, selected }: any) {
   }
 
   return (
-    <div
-      onDoubleClick={() => setIsEditing(true)}
-      className={`flex flex-col items-center justify-center shadow-md border-2 border-t-2 transition-all cursor-pointer relative ${data.isHighlighted
-        ? 'border-yellow-400 ring-2 ring-yellow-400/50 scale-105'
-        : selected
-          ? 'border-primary ring-2 ring-primary/50'
-          : 'border-indigo-500 text-indigo-700 dark:text-indigo-300'
-        }`}
-      style={{
-        width: '120px',
-        height: '90px',
-      }}
-    >
+    <>
       <Handle type="target" position={Position.Top} />
 
-      {/* Top ellipse */}
-      <div className="w-full h-6 border-2 border-current rounded-t-full flex items-center justify-center relative -mb-2">
-        <Database className="size-4" />
-      </div>
-
-      {/* Middle section */}
-      <div className="w-full flex-1 border-l-2 border-r-2 border-current flex items-center justify-center text-xs text-center px-2 font-medium">
+      <div
+        onDoubleClick={() => {
+          console.log('[NODE] DatabaseNode double clicked:', id)
+          setIsEditing(true)
+        }}
+        className={`px-4 py-3 rounded-b-lg shadow-md border-2 border-t-4 transition-all text-sm font-medium flex items-center gap-2 ${data.isHighlighted
+            ? 'border-yellow-400 border-t-yellow-400 ring-2 ring-yellow-400/50 scale-105'
+            : selected
+              ? 'border-primary border-t-primary ring-2 ring-primary/50'
+              : 'border-cyan-600 border-t-cyan-600 text-cyan-700 dark:text-cyan-300'
+          }`}
+      >
         {isEditing ? (
           <input
             autoFocus
@@ -67,17 +62,17 @@ export function DatabaseNode({ data, selected }: any) {
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
-            className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-600 rounded px-1 py-0.5 outline-none text-indigo-700 dark:text-indigo-300 text-xs font-medium w-20"
+            className="bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-600 rounded px-2 py-1 outline-none text-cyan-700 dark:text-cyan-300 text-sm font-medium w-28"
           />
         ) : (
-          <span>{label}</span>
+          <>
+            <Database className="size-4" />
+            <span>{label}</span>
+          </>
         )}
       </div>
 
-      {/* Bottom ellipse */}
-      <div className="w-full h-5 border-2 border-current rounded-b-full" />
-
       <Handle type="source" position={Position.Bottom} />
-    </div>
+    </>
   )
 }
