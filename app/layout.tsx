@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Darker_Grotesque } from "next/font/google";
+import { Geist_Mono, Darker_Grotesque, Spline_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers/providers";
 import 'goey-toast/styles.css'
@@ -15,6 +15,12 @@ const darkerGrotesque = Darker_Grotesque({
   weight: ["600"],
 });
 
+const splineSans = Spline_Sans({
+  variable: "--font-spline-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
 export const metadata: Metadata = {
   title: "Reflow",
   description: "A Realtime Flowchart editor with collaborative editing features built with Supabase and tRPC.",
@@ -27,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistMono.variable} ${darkerGrotesque.variable} antialiased tracking-tight bg-background text-foreground`}>
+      <body className={`${geistMono.variable} ${splineSans.className} ${darkerGrotesque.variable} antialiased tracking-tight bg-background text-foreground`}>
         <Providers>{children}</Providers>
       </body>
     </html>

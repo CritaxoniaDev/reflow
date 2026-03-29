@@ -16,7 +16,7 @@ export const navigationItems = [
         href: '/dashboard',
     },
     {
-        title: 'My Flowcharts',
+        title: 'Flowcharts',
         icon: Workflow,
         href: '/dashboard/my',
     },

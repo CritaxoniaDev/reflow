@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { gooeyToast } from 'goey-toast'
 import { InputOTP, InputOTPGroup, InputOTPSlot, Button, Card, CardContent } from '@/components/ui'
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2, KeyRound } from 'lucide-react'
 import { parseRateLimitSeconds, useVerifyHandlers } from '@/components/auth/_ts/verify'
 
 export function VerifyContent() {
@@ -124,32 +124,7 @@ export function VerifyContent() {
             {/* Loading State */}
             {loading && !success && (
                 <div className="w-full space-y-8">
-                    <div className="space-y-3 text-center">
-                        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl">
-                            <span className="text-4xl font-bold text-black dark:text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
-                                R
-                            </span>
-                        </div>
-                        <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                            Verify your <span className="text-blue-600 dark:text-blue-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>email</span>
-                        </h1>
-                        <p className="text-base text-zinc-600 dark:text-zinc-400">
-                            We're confirming your account. One moment...
-                        </p>
-                    </div>
-
-                    <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800">
-                        <CardContent className="flex flex-col items-center gap-4 pt-6">
-                            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-                            <p className="text-sm text-zinc-600 dark:text-zinc-400">Verifying your email...</p>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
-
-            {/* Manual Input State */}
-            {!loading && !success && (
-                <div className="w-full space-y-8">
+                    {/* Header */}
                     <div className="space-y-3 text-center">
                         <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl">
                             <span className="text-4xl font-bold text-black dark:text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
@@ -160,84 +135,134 @@ export function VerifyContent() {
                             Verify your <span className="text-blue-600 dark:text-blue-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>email</span>
                         </h1>
                         <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
-                            Enter the code from your email to complete {isLogin ? 'sign in' : 'sign up'}
+                            We're confirming your account. One moment...
                         </p>
                     </div>
 
-                    <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800">
-                        <CardContent className="pt-6">
-                            <form onSubmit={handleManualVerify} className="space-y-6">
-                                <div className="space-y-3">
-                                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                                        Enter 8-digit code
-                                    </label>
-                                    <div className="flex justify-center">
-                                        <InputOTP
-                                            maxLength={8}
-                                            value={manualCode}
-                                            onChange={setManualCode}
-                                            disabled={rateLimitSeconds > 0}
-                                            containerClassName="gap-2 px-4 py-3"
-                                        >
-                                            <InputOTPGroup>
-                                                <InputOTPSlot index={0} />
-                                                <InputOTPSlot index={1} />
-                                                <InputOTPSlot index={2} />
-                                                <InputOTPSlot index={3} />
-                                            </InputOTPGroup>
-                                            <InputOTPGroup>
-                                                <InputOTPSlot index={4} />
-                                                <InputOTPSlot index={5} />
-                                                <InputOTPSlot index={6} />
-                                                <InputOTPSlot index={7} />
-                                            </InputOTPGroup>
-                                        </InputOTP>
-                                    </div>
-                                </div>
+                    {/* Loading Card */}
+                    <div className="rounded-2xl border border-zinc-200 bg-white/50 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/50 p-8 sm:p-10">
+                        <div className="flex flex-col items-center gap-4">
+                            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400">Verifying your email...</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                                <Button
-                                    type="submit"
-                                    disabled={loading || manualCode.length !== 8 || rateLimitSeconds > 0}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all rounded-lg dark:bg-blue-600 dark:hover:bg-blue-700"
-                                    size="lg"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Verifying...
-                                        </>
-                                    ) : rateLimitSeconds > 0 ? (
-                                        `Wait ${rateLimitSeconds}s`
-                                    ) : (
-                                        'Verify'
-                                    )}
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
+            {/* Manual Input State */}
+            {!loading && !success && (
+                <div className="w-full space-y-8">
+                    {/* Header */}
+                    <div className="space-y-3 text-center">
+                        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl">
+                            <span className="text-4xl font-bold text-black dark:text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
+                                R
+                            </span>
+                        </div>
+                        <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                            Verify your <span className="text-blue-600 dark:text-blue-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>email</span>
+                        </h1>
+                        <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
+                            Enter the 8-digit code from your email to complete {isLogin ? 'sign in' : 'sign up'}
+                        </p>
+                    </div>
+
+                    {/* Form Card */}
+                    <div className="rounded-2xl border border-zinc-200 bg-white/50 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/50 p-8 sm:p-10">
+                        <form onSubmit={handleManualVerify} className="space-y-6">
+                            {/* Code Input */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <KeyRound className="h-5 w-5 text-zinc-400" />
+                                    <label className="text-sm font-semibold text-zinc-900 dark:text-white">
+                                        Verification Code
+                                    </label>
+                                </div>
+                                <div className="flex justify-center">
+                                    <InputOTP
+                                        maxLength={8}
+                                        value={manualCode}
+                                        onChange={setManualCode}
+                                        disabled={rateLimitSeconds > 0}
+                                        containerClassName="gap-2"
+                                    >
+                                        <InputOTPGroup>
+                                            <InputOTPSlot index={0} className="h-12 w-10 text-lg font-bold" />
+                                            <InputOTPSlot index={1} className="h-12 w-10 text-lg font-bold" />
+                                            <InputOTPSlot index={2} className="h-12 w-10 text-lg font-bold" />
+                                            <InputOTPSlot index={3} className="h-12 w-10 text-lg font-bold" />
+                                        </InputOTPGroup>
+                                        <span className="text-zinc-400">–</span>
+                                        <InputOTPGroup>
+                                            <InputOTPSlot index={4} className="h-12 w-10 text-lg font-bold" />
+                                            <InputOTPSlot index={5} className="h-12 w-10 text-lg font-bold" />
+                                            <InputOTPSlot index={6} className="h-12 w-10 text-lg font-bold" />
+                                            <InputOTPSlot index={7} className="h-12 w-10 text-lg font-bold" />
+                                        </InputOTPGroup>
+                                    </InputOTP>
+                                </div>
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+                                    Check your email for the verification code
+                                </p>
+                            </div>
+
+                            {/* Submit Button */}
+                            <Button
+                                type="submit"
+                                disabled={loading || manualCode.length !== 8 || rateLimitSeconds > 0}
+                                className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all rounded-lg dark:bg-blue-600 dark:hover:bg-blue-700"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        Verifying...
+                                    </>
+                                ) : rateLimitSeconds > 0 ? (
+                                    `Wait ${rateLimitSeconds}s`
+                                ) : (
+                                    'Verify Email'
+                                )}
+                            </Button>
+                        </form>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="text-center">
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                            Didn't receive the code?{' '}
+                            <button className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                Resend
+                            </button>
+                        </p>
+                    </div>
                 </div>
             )}
 
             {/* Success State */}
             {success && (
                 <div className="w-full space-y-8">
+                    {/* Header */}
                     <div className="space-y-3 text-center">
                         <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl">
                             <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
                         </div>
                         <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                            All set!
+                            All <span className="text-green-600 dark:text-green-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>set!</span>
                         </h1>
-                        <p className="text-base text-zinc-600 dark:text-zinc-400">
-                            {isLogin ? 'You have been signed in.' : 'Your email has been verified.'}
+                        <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
+                            {isLogin ? 'You have been signed in successfully.' : 'Your email has been verified successfully.'}
                         </p>
                     </div>
 
-                    <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border-zinc-200 dark:border-zinc-800">
-                        <CardContent className="flex flex-col items-center gap-4 pt-6">
-                            <CheckCircle2 className="h-16 w-16 text-green-600 dark:text-green-400" />
-                        </CardContent>
-                    </Card>
+                    {/* Success Card */}
+                    <div className="rounded-2xl border border-green-200/50 bg-white/50 backdrop-blur-sm dark:border-green-900/30 dark:bg-zinc-900/50 p-8 sm:p-10">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="p-4 rounded-full bg-green-100 dark:bg-green-950/30">
+                                <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
+                            </div>
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400">Redirecting to dashboard...</p>
+                        </div>
+                    </div>
                 </div>
             )}
         </>
