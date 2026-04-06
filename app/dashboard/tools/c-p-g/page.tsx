@@ -6,7 +6,8 @@ import {
   RefreshCw,
   Download,
   Palette,
-  ArrowLeft,
+  Plus,
+  Minus,
 } from 'lucide-react'
 import {
   SidebarInset,
@@ -19,7 +20,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Badge,
 } from '@/components/ui'
 import {
   generatePalette,
@@ -37,6 +37,9 @@ const SCHEMES = [
   { id: 'tints', label: 'Tints', description: 'Lighter versions' },
 ]
 
+// Static initial colors to avoid hydration mismatch
+const INITIAL_RANDOM_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8']
+
 export default function ColorPaletteGenerator() {
   const router = useRouter()
   const [baseColor, setBaseColor] = useState('#3B82F6')
@@ -45,13 +48,67 @@ export default function ColorPaletteGenerator() {
   const [copiedColor, setCopiedColor] = useState<string | null>(null)
   const [selectedFormat, setSelectedFormat] = useState<'hex' | 'rgb' | 'hsl'>('hex')
 
+  // Random color explorer state - initialize with static colors
+  const [randomColors, setRandomColors] = useState<string[]>(INITIAL_RANDOM_COLORS)
+  const [randomCount, setRandomCount] = useState(5)
+  const [copiedRandomColor, setCopiedRandomColor] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
   useEffect(() => {
     const newPalette = generatePalette(baseColor, scheme)
     setPalette(newPalette)
   }, [baseColor, scheme])
 
+  // Initialize random colors on client mount
+  useEffect(() => {
+    setIsClient(true)
+    setRandomColors(Array.from({ length: randomCount }, () => getRandomColor()))
+  }, [])
+
+  // Keyboard listener for space bar
+  useEffect(() => {
+    if (!isClient) return
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault()
+        // If not at 5 colors, reset to 5 and regenerate
+        if (randomCount !== 5) {
+          setRandomCount(5)
+          setRandomColors(Array.from({ length: 5 }, () => getRandomColor()))
+        } else {
+          // If already at 5, just regenerate
+          handleRegenerateRandomColors()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [randomCount, isClient])
+
   const handleRandomColor = () => {
     setBaseColor(getRandomColor())
+  }
+
+  const handleRegenerateRandomColors = () => {
+    setRandomColors(Array.from({ length: randomCount }, () => getRandomColor()))
+  }
+
+  const handleIncreaseRandomColors = () => {
+    if (randomCount < 7) {
+      const newCount = randomCount + 1
+      setRandomCount(newCount)
+      setRandomColors(Array.from({ length: newCount }, () => getRandomColor()))
+    }
+  }
+
+  const handleDecreaseRandomColors = () => {
+    if (randomCount > 2) {
+      const newCount = randomCount - 1
+      setRandomCount(newCount)
+      setRandomColors(randomColors.slice(0, newCount))
+    }
   }
 
   const handleCopyColor = (color: string) => {
@@ -61,6 +118,15 @@ export default function ColorPaletteGenerator() {
     navigator.clipboard.writeText(textToCopy)
     setCopiedColor(color)
     setTimeout(() => setCopiedColor(null), 2000)
+  }
+
+  const handleCopyRandomColor = (color: string) => {
+    const formats = getColorFormats(color)
+    const textToCopy = formats[selectedFormat]
+
+    navigator.clipboard.writeText(textToCopy)
+    setCopiedRandomColor(color)
+    setTimeout(() => setCopiedRandomColor(null), 2000)
   }
 
   const handleExportJSON = () => {
@@ -122,6 +188,76 @@ export default function ColorPaletteGenerator() {
               </div>
             </div>
           </div>
+
+          {/* Random Color Explorer */}
+          <Card className="bg-gradient-to-br from-pink-50/50 to-rose-50/50 dark:from-pink-950/20 dark:to-rose-950/20 rounded-lg p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold">Quick Color Explorer</h2>
+                <p className="text-sm text-muted-foreground">Click any color or press SPACE to regenerate. Adjust count with +/−</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleDecreaseRandomColors}
+                  disabled={randomCount <= 2}
+                  variant="outline"
+                  size="sm"
+                  className="border-pink-200 hover:bg-pink-100 dark:hover:bg-pink-900/30"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <span className="px-4 py-2 text-sm font-semibold">
+                  {randomCount}
+                </span>
+                <Button
+                  onClick={handleIncreaseRandomColors}
+                  disabled={randomCount >= 7}
+                  variant="outline"
+                  size="sm"
+                  className="border-pink-200 hover:bg-pink-100 dark:hover:bg-pink-900/30"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className={`grid h-96 ${randomCount === 2 ? 'grid-cols-2' :
+                randomCount === 3 ? 'grid-cols-3' :
+                  randomCount === 4 ? 'grid-cols-4' :
+                    randomCount === 5 ? 'grid-cols-5' :
+                      randomCount === 6 ? 'grid-cols-6' :
+                        'grid-cols-7'
+              }`}>
+              {randomColors.map((color, index) => (
+                <div
+                  key={index}
+                  className="group relative overflow-hidden cursor-pointer transition-all hover:shadow-2xl"
+                  onClick={() => handleCopyRandomColor(color)}
+                  style={{ backgroundColor: color }}
+                >
+                  {/* Dark overlay on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all" />
+
+                  {/* Content at bottom */}
+                  <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
+                    <div className="text-xl font-mono font-semibold text-white mb-2">
+                      {color}
+                    </div>
+                    {copiedRandomColor === color ? (
+                      <div className="text-xs font-medium text-green-300 flex items-center gap-1">
+                        <span>✓</span>
+                        <span>Copied</span>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-white/70 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Click to copy
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Settings Panel */}
@@ -193,28 +329,28 @@ export default function ColorPaletteGenerator() {
 
                   {/* Action Buttons */}
                   <div className="space-y-2 pt-4 border-t">
-                    <Button 
-                      onClick={handleRandomColor} 
-                      variant="outline" 
-                      className="w-full border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-950/30" 
+                    <Button
+                      onClick={handleRandomColor}
+                      variant="outline"
+                      className="w-full border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-950/30"
                       size="sm"
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Random Color
                     </Button>
-                    <Button 
-                      onClick={handleExportJSON} 
-                      variant="outline" 
-                      className="w-full border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-950/30" 
+                    <Button
+                      onClick={handleExportJSON}
+                      variant="outline"
+                      className="w-full border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-950/30"
                       size="sm"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Export JSON
                     </Button>
-                    <Button 
-                      onClick={handleExportCSS} 
-                      variant="outline" 
-                      className="w-full border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-950/30" 
+                    <Button
+                      onClick={handleExportCSS}
+                      variant="outline"
+                      className="w-full border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-950/30"
                       size="sm"
                     >
                       <Download className="h-4 w-4 mr-2" />
@@ -239,11 +375,10 @@ export default function ColorPaletteGenerator() {
                       <button
                         key={s.id}
                         onClick={() => setScheme(s.id)}
-                        className={`p-3 rounded-lg border-2 transition-all text-left ${
-                          scheme === s.id
-                            ? 'border-pink-600 bg-pink-50 dark:bg-pink-950'
-                            : 'border-input hover:border-pink-300'
-                        }`}
+                        className={`p-3 rounded-lg border-2 transition-all text-left ${scheme === s.id
+                          ? 'border-pink-600 bg-pink-50 dark:bg-pink-950'
+                          : 'border-input hover:border-pink-300'
+                          }`}
                       >
                         <div className="text-sm font-semibold">{s.label}</div>
                         <div className="text-xs text-muted-foreground">{s.description}</div>

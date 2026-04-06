@@ -34,9 +34,6 @@ export function AuthNavHead({
   isTeamFlowchart = false,
   activeMembers = [],
 }: AuthNavHeadProps) {
-  // Debug log
-  console.log('[AuthNavHead] Render with:', { isTeamFlowchart, teamName, activeMembersCount: activeMembers.length })
-
   return (
     <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-17 items-center justify-between px-6 gap-4">

@@ -43,7 +43,7 @@ function SidebarHeaderContent() {
     return (
         <div className="flex px-2 py-3">
             <span className="text-xl font-bold" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
-                Reflow
+                Reflooow
             </span>
         </div>
     )

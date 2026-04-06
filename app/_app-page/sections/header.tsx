@@ -6,7 +6,6 @@ import { AnimatedThemeToggler } from '@/components/common/animated-theme-toggler
 import { Button } from '@/components/ui'
 
 export function Header() {
-
   const router = useRouter()
   
   return (
@@ -16,15 +15,14 @@ export function Header() {
           {/* Logo */}
           <a href="/" className="flex items-center gap-2">
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
-              ReFLOW
+              ReFLOOOW
             </span>
           </a>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <NavLink label="Features" href="#features" />
-            <NavLink label="Docs" href="#docs" />
-            <NavLink label="Pricing" href="#pricing" />
+            <NavLink label="Changelogs" href="/changelogs" />
+            <NavLink label="Features" href="/#features" />
           </nav>
 
           {/* CTA Buttons */}
@@ -33,7 +31,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="sm"
-              onClick = {() => router.push('/auth/login')}
+              onClick={() => router.push('/auth/login')}
               className="text-sm font-medium"
             >
               Sign In

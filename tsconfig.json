@@ -24,7 +24,8 @@
       "@shadcn/*": ["packages/shadcn-v1/*"],
       "@supabase/*": ["packages/supabase-v1/*"],
       "@trpc/*": ["packages/trpc-v1/*"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "next-env.d.ts",

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import {
   Copy,
   Download,
-  Palette,
   ArrowLeft,
   Code,
 } from 'lucide-react'
@@ -20,10 +19,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui'
+import Editor from '@monaco-editor/react'
 import {
   convertFrameworkToCss,
   generateCssFile,
   exportAsScss,
+  formatCssOutput,
   frameworkDocs,
 } from '../../_ts/tools/cfc'
 
@@ -37,21 +38,21 @@ const FRAMEWORKS = [
 export default function CssFrameworkConverter() {
   const router = useRouter()
   const [framework, setFramework] = useState<'tailwind' | 'bootstrap' | 'bulma' | 'materialize'>('tailwind')
-  const [input, setInput] = useState('flex flex-col gap-4 p-6 rounded-lg shadow-md')
+  const [input, setInput] = useState('flex flex-col md:flex-row gap-4 p-6 md:p-8 lg:p-12 rounded-lg shadow-md')
   const [selector, setSelector] = useState('.my-component')
   const [copied, setCopied] = useState(false)
 
   const cssOutput = convertFrameworkToCss(input, framework)
+  const formattedOutput = formatCssOutput(selector, cssOutput)
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(cssOutput)
+    navigator.clipboard.writeText(formattedOutput)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleDownloadCss = () => {
-    const content = generateCssFile(selector, cssOutput)
-    const blob = new Blob([content], { type: 'text/css' })
+    const blob = new Blob([formattedOutput], { type: 'text/css' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -60,8 +61,7 @@ export default function CssFrameworkConverter() {
   }
 
   const handleDownloadScss = () => {
-    const content = exportAsScss(selector, cssOutput)
-    const blob = new Blob([content], { type: 'text/plain' })
+    const blob = new Blob([formattedOutput], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -215,7 +215,7 @@ export default function CssFrameworkConverter() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle>Generated CSS</CardTitle>
-                    <CardDescription>Raw CSS output</CardDescription>
+                    <CardDescription>Formatted CSS output with media queries</CardDescription>
                   </div>
                   <Button
                     onClick={handleCopy}
@@ -229,36 +229,43 @@ export default function CssFrameworkConverter() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-sm overflow-x-auto">
-                      <p className="text-slate-600 dark:text-slate-400 mb-2">{selector} {'{'}</p>
-                      <div className="ml-4 text-slate-800 dark:text-slate-200 space-y-1">
-                        {cssOutput.split(';').map((prop, idx) => (
-                          prop.trim() && (
-                            <div key={idx}>
-                              {prop.trim()};
-                            </div>
-                          )
-                        ))}
-                      </div>
-                      <p className="text-slate-600 dark:text-slate-400 mt-2">{'}'}</p>
+                    {/* Monaco Editor */}
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                      <Editor
+                        height="300px"
+                        defaultLanguage="css"
+                        value={formattedOutput}
+                        theme="light"
+                        options={{
+                          readOnly: true,
+                          minimap: { enabled: false },
+                          scrollBeyondLastLine: false,
+                          fontSize: 13,
+                          fontFamily: "'Fira Code', monospace",
+                          formatOnPaste: false,
+                          formatOnType: false,
+                          wordWrap: 'on',
+                          padding: { top: 16, bottom: 16 },
+                        }}
+                      />
                     </div>
 
-                    {/* Rules List */}
+                    {/* Rules Summary */}
                     <div className="space-y-2">
-                      <h3 className="text-sm font-semibold">Conversion Details</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {cssOutput.split(';').map((prop, idx) => (
-                          prop.trim() && (
-                            <div
-                              key={idx}
-                              className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs"
-                            >
-                              <span className="text-slate-600 dark:text-slate-400">→</span>
-                              {' '}
-                              <span className="font-mono">{prop.trim()};</span>
-                            </div>
-                          )
-                        ))}
+                      <h3 className="text-sm font-semibold">Conversion Summary</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <p className="text-xs text-slate-600 dark:text-slate-400">Input Classes</p>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{input.split(' ').length}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <p className="text-xs text-slate-600 dark:text-slate-400">CSS Rules</p>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{cssOutput.split(';').filter(r => r.trim() && !r.includes('@media')).length}</p>
+                        </div>
+                        <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <p className="text-xs text-slate-600 dark:text-slate-400">Media Queries</p>
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white">{(cssOutput.match(/@media/g) || []).length}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -273,10 +280,11 @@ export default function CssFrameworkConverter() {
                 <CardContent>
                   <ul className="text-sm space-y-2 text-slate-600 dark:text-slate-400">
                     <li>• Enter space-separated utility classes</li>
-                    <li>• Output combines multiple properties</li>
+                    <li>• <strong>Responsive classes:</strong> Use breakpoint prefixes (sm:, md:, lg:, xl:, 2xl:)</li>
+                    <li>• Example: <code className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">md:flex lg:p-4 xl:gap-6</code></li>
+                    <li>• Output automatically formats with media queries</li>
                     <li>• Customize CSS selector for your use case</li>
-                    <li>• Export as CSS or SCSS file</li>
-                    <li>• Supports common utility classes from selected framework</li>
+                    <li>• Export as CSS or SCSS file with preserved formatting</li>
                   </ul>
                 </CardContent>
               </Card>

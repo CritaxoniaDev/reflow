@@ -275,6 +275,16 @@ export const toolsData = [
         textColor: 'text-emerald-600',
         route: '/dashboard/tools/qr-code',
     },
+    {
+        id: 'file-encryptor/decryptor',
+        name: 'File Encryptor/Decryptor',
+        category: 'conversion',
+        icon: Lock,
+        description: 'Encrypt and decrypt files securely',
+        color: 'bg-zinc-500/10',
+        textColor: 'text-zinc-600',
+        route: '/dashboard/tools/file-encryptor-decryptor',
+    }
 ]
 
 export const categoriesData = [
