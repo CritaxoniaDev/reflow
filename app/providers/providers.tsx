@@ -1,6 +1,7 @@
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Analytics } from '@vercel/analytics/next';
 import { httpBatchLink } from '@trpc/client'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ThemeProvider } from 'next-themes'
@@ -77,6 +78,7 @@ export function Providers({ children }: { children: ReactNode }) {
             <QueryClientProvider client={queryClient}>
               <DataIdInjector />
               <NuqsAdapter>{children}</NuqsAdapter>
+              <Analytics />
               <GooeyToaster position="bottom-right" />
             </QueryClientProvider>
           </trpc.Provider>
