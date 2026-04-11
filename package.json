@@ -17,6 +17,7 @@
     "@trpc/react-query": "^11.12.1",
     "@trpc/server": "^11.12.1",
     "@vercel/analytics": "^2.0.1",
+    "boneyard-js": "^1.7.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

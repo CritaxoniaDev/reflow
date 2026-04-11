@@ -29,12 +29,12 @@ export function RegisterForm() {
             {/* Header */}
             <div className="space-y-3 text-center">
                 <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl">
-                    <span className="text-4xl font-bold text-black dark:text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
+                    <span className="text-5xl font-bold text-black dark:text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
                         R
                     </span>
                 </div>
                 <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                    Create <span className="text-blue-600 dark:text-blue-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>your</span> account
+                    Create <span className="text-blue-600 dark:text-blue-400 text-5xl font-serif mr-1">your</span> account
                 </h1>
                 <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
                     Join thousands of teams creating flowcharts together. No credit card required.

@@ -23,7 +23,8 @@
       "@/*": ["./*"],
       "@shadcn/*": ["packages/shadcn-v1/*"],
       "@supabase/*": ["packages/supabase-v1/*"],
-      "@trpc/*": ["packages/trpc-v1/*"]
+      "@trpc/*": ["packages/trpc-v1/*"],
+      "@dashboard/ts/*": ["app/dashboard/_ts/*"]
     },
     "ignoreDeprecations": "5.0"
   },

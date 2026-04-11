@@ -20,13 +20,84 @@ import {
   CardHeader,
   CardTitle,
   Badge,
+  Skeleton,
 } from '@/components/ui'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toolsData, categoriesData, useDashboardData } from './_ts/dashboard'
+
+// Skeleton Components
+const StatsSkeleton = () => (
+  <>
+    {[...Array(3)].map((_, i) => (
+      <Card key={i}>
+        <CardContent>
+          <div className="flex items-start justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-16 mt-2" />
+            </div>
+            <Skeleton className="h-12 w-12 rounded-lg" />
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </>
+)
+
+const RecentFlowchartsSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {[...Array(3)].map((_, i) => (
+      <Card key={i}>
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-24" />
+          <div className="pt-4 border-t border-border">
+            <Skeleton className="h-6 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)
+
+const ToolsSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    {[...Array(8)].map((_, i) => (
+      <Card key={i}>
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-start justify-between">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)
+
+const WelcomeSkeleton = () => (
+  <div className="space-y-2">
+    <Skeleton className="h-10 w-72" />
+    <Skeleton className="h-5 w-96" />
+  </div>
+)
 
 export default function DashboardPage() {
   const router = useRouter()
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [isLoadingTools, setIsLoadingTools] = useState(true)
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
 
   // Fetch all dashboard data using custom hook
   const {
@@ -36,6 +107,18 @@ export default function DashboardPage() {
     currentUser,
   } = useDashboardData()
 
+  // Simulate tools loading delay
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoadingTools(false), 800)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Simulate stats loading delay
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoadingStats(false), 800)
+    return () => clearTimeout(timer)
+  }, [])
+
   const filteredTools = selectedCategory === 'all'
     ? toolsData
     : toolsData.filter(tool => tool.category === selectedCategory)
@@ -44,43 +127,51 @@ export default function DashboardPage() {
     router.push(route)
   }
 
+  // Handle open flowchart
   const handleFlowchartClick = (id: string) => {
     router.push(`/dashboard/flowcharts/${id}`)
   }
 
   return (
     <SidebarInset>
-      {/* Main Content */}
       <div className="flex-1 space-y-8 p-6 md:p-8">
         {/* Welcome Section */}
-        <div className="space-y-2">
-          <h2 className="text-4xl font-bold tracking-tight" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
-            Welcome back, <span className="text-blue-600 uppercase">{currentUser?.username || 'User'}</span>!
-          </h2>
-          <p className="text-muted-foreground">
-            Create, collaborate, and share flowcharts with your team in real-time.
-          </p>
-        </div>
+        {isLoadingStats ? (
+          <WelcomeSkeleton />
+        ) : (
+          <div className="space-y-2">
+            <h2 className="text-4xl font-bold tracking-tight">
+              Welcome back, <span className="text-blue-600 uppercase font-mono">{currentUser?.username || 'User'}</span>!
+            </h2>
+            <p className="text-muted-foreground">
+              Create, collaborate, and share flowcharts with your team in real-time.
+            </p>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {stats.map((stat) => (
-            <Card key={stat.title} className="hover:shadow-md transition-shadow">
-              <CardContent>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {stat.title}
-                    </p>
-                    <p className="text-3xl font-bold mt-2">{stat.value}</p>
+          {isLoadingStats ? (
+            <StatsSkeleton />
+          ) : stats && stats.length > 0 ? (
+            stats.map((stat) => (
+              <Card key={stat.title} className="hover:shadow-md transition-shadow">
+                <CardContent>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {stat.title}
+                      </p>
+                      <p className="text-3xl font-bold mt-2">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${stat.color}`}>
+                      <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
+                    </div>
                   </div>
-                  <div className={`p-3 rounded-lg ${stat.color}`}>
-                    <stat.icon className={`h-6 w-6 ${stat.textColor}`} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          ) : null}
         </div>
 
         {/* Recent Flowcharts */}
@@ -93,24 +184,22 @@ export default function DashboardPage() {
           </div>
 
           {isLoadingFlowcharts ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
+            <RecentFlowchartsSkeleton />
           ) : recentFlowcharts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* @ts-ignore */}
               {recentFlowcharts.map((flowchart) => (
-                <Card 
-                  key={flowchart.id} 
+                <Card
+                  key={flowchart.id}
                   className="group hover:shadow-md transition-all hover:border-blue-500/50 cursor-pointer"
                   onClick={() => handleFlowchartClick(flowchart.id)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <Workflow className="h-8 w-8 text-blue-600" />
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -188,46 +277,50 @@ export default function DashboardPage() {
           </div>
 
           {/* Tools Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredTools.map((tool) => (
-              <Card 
-                key={tool.id} 
-                className="group hover:shadow-md transition-all hover:border-blue-500/50 cursor-pointer"
-                onClick={() => handleToolClick(tool.route)}
-              >
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className={`p-2 rounded-lg ${tool.color}`}>
-                      <tool.icon className={`h-5 w-5 ${tool.textColor}`} />
+          {isLoadingTools ? (
+            <ToolsSkeleton />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredTools.map((tool) => (
+                <Card
+                  key={tool.id}
+                  className="group hover:shadow-md transition-all hover:border-blue-500/50 cursor-pointer"
+                  onClick={() => handleToolClick(tool.route)}
+                >
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className={`p-2 rounded-lg ${tool.color}`}>
+                        <tool.icon className={`h-5 w-5 ${tool.textColor}`} />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleToolClick(tool.route)
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleToolClick(tool.route)
-                      }}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
 
-                  <div>
-                    <h4 className="font-semibold text-sm mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {tool.name}
-                    </h4>
+                    <div>
+                      <h4 className="font-semibold text-sm mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {tool.name}
+                      </h4>
 
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {tool.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {tool.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-          {filteredTools.length === 0 && (
+          {!isLoadingTools && filteredTools.length === 0 && (
             <div className="flex items-center justify-center py-12">
               <p className="text-muted-foreground">No tools found in this category</p>
             </div>

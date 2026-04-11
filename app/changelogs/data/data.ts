@@ -2,6 +2,92 @@ import { Rocket, Sparkles, Bug, Zap, Wrench } from 'lucide-react'
 
 export const changelogData = [
     {
+        version: 'v0.10.0',
+        title: 'Release v0.10.0 – Analytics & Web Vitals',
+        date: '2026-04-07',
+        releaseType: 'minor',
+        description: 'Integrated Vercel Web Vitals tracking for performance monitoring and analytics insights',
+        tags: ['Analytics', 'Performance', 'Monitoring'],
+        videoPreview: null,
+        sections: [
+            {
+                title: 'New Features',
+                icon: Rocket,
+                items: [
+                    {
+                        title: 'Vercel Web Vitals Integration',
+                        description: 'Real-time performance monitoring with Vercel Web Vitals tracking. Monitors Core Web Vitals including LCP, FID, and CLS metrics for continuous performance optimization.',
+                        codeExample: `// Web Vitals tracking
+import { reportWebVitals } from 'next/web-vitals'
+
+export function reportWebVitals(metric: any) {
+  console.log(metric)
+  // Send to analytics service
+  fetch('/api/analytics', {
+    body: JSON.stringify(metric),
+    method: 'POST',
+  })
+}`,
+                        isPriority: true,
+                    },
+                ],
+            },
+            {
+                title: 'Improvements',
+                icon: Sparkles,
+                items: [
+                    {
+                        title: 'Performance Dashboard',
+                        description: 'New analytics dashboard showing performance metrics, user behavior insights, and optimization recommendations.',
+                        isPriority: false,
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        version: 'v0.9.0',
+        title: 'Release v0.9.0 – Branding & Metadata Updates',
+        date: '2026-04-06',
+        releaseType: 'patch',
+        description: 'Updated branding, metadata, and app configuration for Reflow as a developer tools library',
+        tags: ['Branding', 'Metadata', 'SEO'],
+        videoPreview: null,
+        sections: [
+            {
+                title: 'Improvements',
+                icon: Sparkles,
+                items: [
+                    {
+                        title: 'App Branding',
+                        description: 'Refreshed application branding with updated logos, colors, and visual identity across all pages and components.',
+                        isPriority: false,
+                    },
+                    {
+                        title: 'Metadata & SEO',
+                        description: 'Enhanced metadata configuration including open graph tags, structured data, and improved SEO for better discoverability.',
+                        codeExample: `// Updated metadata
+export const metadata = {
+  title: 'Reflow - Developer Design Tools',
+  description: 'Create flowcharts, design systems, and collaborate in real-time',
+  openGraph: {
+    title: 'Reflow',
+    description: 'Developer-first flowchart and design tools',
+    type: 'website',
+  },
+}`,
+                        isPriority: false,
+                    },
+                    {
+                        title: 'Next.js Configuration',
+                        description: 'Updated Next.js configuration to optimize build performance and deployment on modern infrastructure.',
+                        isPriority: false,
+                    },
+                ],
+            },
+        ],
+    },
+    {
         version: 'v0.8.0',
         title: 'Release v0.8.0 – Design Tools Suite Launch',
         date: '2026-03-29',

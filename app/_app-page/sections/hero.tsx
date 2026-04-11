@@ -56,16 +56,16 @@ export function Hero() {
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
                 <PointerHighlight pointerClassName="text-blue-500">
                   <span className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 dark:from-white dark:via-zinc-100 dark:to-white bg-clip-text text-transparent">
-                    Developer
+                    Developer &
                   </span>
                 </PointerHighlight>
                 {' '}
-                <span className='text-6xl font-light' style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
-                  Tools
-                </span>
-                {' '}
                 <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 dark:from-blue-400 dark:via-blue-300 dark:to-cyan-400 bg-clip-text text-transparent">
                   Library
+                </span>
+                {' '}
+                <span className='text-8xl mr-3 italic font-light font-serif'>
+                  Tools
                 </span>
               </h1>
 

@@ -127,12 +127,12 @@ export function VerifyContent() {
                     {/* Header */}
                     <div className="space-y-3 text-center">
                         <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl">
-                            <span className="text-4xl font-bold text-black dark:text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
+                            <span className="text-5xl font-bold text-black dark:text-white" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>
                                 R
                             </span>
                         </div>
                         <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                            Verify your <span className="text-blue-600 dark:text-blue-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>email</span>
+                            Verify your <span className="text-blue-600 dark:text-blue-400 text-5xl font-serif">email</span>
                         </h1>
                         <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
                             We're confirming your account. One moment...
@@ -160,7 +160,7 @@ export function VerifyContent() {
                             </span>
                         </div>
                         <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                            Verify your <span className="text-blue-600 dark:text-blue-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>email</span>
+                            Verify your <span className="text-blue-600 dark:text-blue-400 text-5xl font-serif">email</span>
                         </h1>
                         <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
                             Enter the 8-digit code from your email to complete {isLogin ? 'sign in' : 'sign up'}
@@ -242,26 +242,64 @@ export function VerifyContent() {
             {success && (
                 <div className="w-full space-y-8">
                     {/* Header */}
-                    <div className="space-y-3 text-center">
-                        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl">
-                            <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
+                    <div className="space-y-4 text-center">
+                        <div className="inline-flex items-center justify-center">
+                            <div className="p-3 rounded-full bg-green-100 dark:bg-green-950/40 border border-green-200/60 dark:border-green-900/40">
+                                <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400 scale-100 transition-transform duration-300" />
+                            </div>
                         </div>
-                        <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
-                            All <span className="text-green-600 dark:text-green-400" style={{ fontFamily: '"Aloja Extended", sans-serif' }}>set!</span>
-                        </h1>
-                        <p className="text-base text-zinc-600 dark:text-zinc-400 max-w-sm mx-auto">
-                            {isLogin ? 'You have been signed in successfully.' : 'Your email has been verified successfully.'}
-                        </p>
+
+                        <div className="space-y-2">
+                            <h1 className="text-5xl sm:text-6xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                                All <span className="text-green-600 dark:text-green-400 font-serif">set!</span>
+                            </h1>
+                            <p className="text-lg text-zinc-600 dark:text-zinc-300 max-w-sm mx-auto leading-relaxed">
+                                {isLogin ? 'You have been signed in successfully.' : 'Your email has been verified successfully.'}
+                            </p>
+                        </div>
                     </div>
 
                     {/* Success Card */}
-                    <div className="rounded-2xl border border-green-200/50 bg-white/50 backdrop-blur-sm dark:border-green-900/30 dark:bg-zinc-900/50 p-8 sm:p-10">
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="p-4 rounded-full bg-green-100 dark:bg-green-950/30">
-                                <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-400" />
+                    <div className="rounded-2xl border border-green-200/60 bg-gradient-to-br from-white/70 to-green-50/40 dark:from-zinc-900/70 dark:to-green-950/20 backdrop-blur-xl shadow-lg dark:border-green-900/40 p-8 sm:p-12">
+                        <div className="flex flex-col items-center gap-6">
+                            {/* Checkmark with background */}
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-green-200/30 dark:bg-green-600/20 rounded-full blur-xl" />
+                                <div className="relative p-5 rounded-full bg-green-100 dark:bg-green-950/60 border border-green-200/50 dark:border-green-900/50">
+                                    <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+                                </div>
                             </div>
-                            <p className="text-sm text-zinc-600 dark:text-zinc-400">Redirecting to dashboard...</p>
+
+                            {/* Status message */}
+                            <div className="text-center space-y-2">
+                                <p className="text-base font-semibold text-zinc-900 dark:text-white">
+                                    {isLogin ? 'Welcome back!' : 'Account verified!'}
+                                </p>
+                                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                                    Redirecting to your dashboard...
+                                </p>
+                            </div>
+
+                            {/* Loading indicator */}
+                            <div className="flex gap-1.5">
+                                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                            </div>
                         </div>
+                    </div>
+
+                    {/* Footer hint */}
+                    <div className="text-center space-y-2">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            If you're not redirected in a few seconds,{' '}
+                            <button
+                                onClick={() => router.push('/dashboard')}
+                                className="font-semibold text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                            >
+                                click here
+                            </button>
+                        </p>
                     </div>
                 </div>
             )}

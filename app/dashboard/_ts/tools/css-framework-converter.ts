@@ -475,3 +475,337 @@ export const formatCssOutput = (selector: string, css: string): string => {
   formatted += `}`
   return formatted
 }
+
+// css-framework-converter.ts - Add these functions
+
+export interface HierarchyNode {
+  tagName: string
+  classes: string[]
+  id?: string
+  children: HierarchyNode[]
+  customClass?: string
+}
+
+// Improved HTML extraction that handles complete documents, DOCTYPE, and complex nesting
+export const extractHierarchy = (html: string): HierarchyNode | null => {
+  let normalizedHtml = html.trim()
+  
+  // Remove DOCTYPE declaration if present
+  normalizedHtml = normalizedHtml.replace(/^<!DOCTYPE\s+html[^>]*>/i, '').trim()
+  
+  // Remove XML declaration if present
+  normalizedHtml = normalizedHtml.replace(/^<\?xml[^?]*\?>/i, '').trim()
+  
+  // Remove HTML comments
+  normalizedHtml = normalizedHtml.replace(/<!--[\s\S]*?-->/g, '').trim()
+  
+  // Extract body content if it exists
+  let contentToProcess = normalizedHtml
+  const bodyMatch = normalizedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+  
+  if (bodyMatch) {
+    // Use the full body tag with its content
+    contentToProcess = bodyMatch[0]
+  } else {
+    // Try to find html tag
+    const htmlMatch = normalizedHtml.match(/<html[^>]*>([\s\S]*?)<\/html>/i)
+    if (htmlMatch) {
+      contentToProcess = htmlMatch[0]
+    }
+  }
+  
+  const parseElement = (content: string): HierarchyNode | null => {
+    content = content.trim()
+    if (!content) return null
+    
+    // Match opening tag
+    const openingTagMatch = content.match(/^<([a-zA-Z][a-zA-Z0-9\-:]*)\s*([^>]*)>/);
+    if (!openingTagMatch) return null;
+    
+    const [fullOpeningTag, tagName, attributes] = openingTagMatch;
+    const tagNameLower = tagName.toLowerCase();
+    
+    // Check if it's declared as self-closing with />
+    if (fullOpeningTag.endsWith('/>')) {
+      const classMatch = attributes.match(/class\s*=\s*['"](.*?)['"]|className\s*=\s*['"](.*?)['"]/);
+      const classStr = classMatch ? (classMatch[1] || classMatch[2]) : '';
+      const classes = classStr.split(/\s+/).filter(c => c.trim());
+      const idMatch = attributes.match(/id\s*=\s*['"](.*?)['"]/);
+      const id = idMatch ? idMatch[1] : undefined;
+      
+      return {
+        tagName,
+        classes,
+        id,
+        children: [],
+      };
+    }
+    
+    // Check if it's a known self-closing tag
+    if (getSelfClosingTags().includes(tagNameLower)) {
+      const classMatch = attributes.match(/class\s*=\s*['"](.*?)['"]|className\s*=\s*['"](.*?)['"]/);
+      const classStr = classMatch ? (classMatch[1] || classMatch[2]) : '';
+      const classes = classStr.split(/\s+/).filter(c => c.trim());
+      const idMatch = attributes.match(/id\s*=\s*['"](.*?)['"]/);
+      const id = idMatch ? idMatch[1] : undefined;
+      
+      return {
+        tagName,
+        classes,
+        id,
+        children: [],
+      };
+    }
+    
+    // Extract class and id
+    const classMatch = attributes.match(/class\s*=\s*['"](.*?)['"]|className\s*=\s*['"](.*?)['"]/);
+    const classStr = classMatch ? (classMatch[1] || classMatch[2]) : '';
+    const classes = classStr.split(/\s+/).filter(c => c.trim());
+    
+    const idMatch = attributes.match(/id\s*=\s*['"](.*?)['"]/);
+    const id = idMatch ? idMatch[1] : undefined;
+    
+    // Find matching closing tag
+    const closeTagPattern = new RegExp(`</${tagNameLower}>`, 'i');
+    let tagDepth = 1;
+    let searchPos = fullOpeningTag.length;
+    let closingTagIndex = -1;
+    
+    while (tagDepth > 0 && searchPos < content.length) {
+      const openTagPattern = new RegExp(`<${tagNameLower}(?:\\s|>|\\-)`, 'i');
+      const remainingContent = content.substring(searchPos);
+      
+      const openMatch = remainingContent.match(openTagPattern);
+      const closeMatch = remainingContent.match(closeTagPattern);
+      
+      const openIndex = openMatch ? searchPos + remainingContent.indexOf(openMatch[0]) : -1;
+      const closeIndex = closeMatch ? searchPos + remainingContent.indexOf(closeMatch[0]) : -1;
+      
+      if (closeIndex === -1) return null;
+      
+      if (openIndex !== -1 && openIndex < closeIndex) {
+        tagDepth++;
+        searchPos = openIndex + 1;
+      } else {
+        tagDepth--;
+        if (tagDepth === 0) {
+          closingTagIndex = closeIndex;
+        }
+        searchPos = closeIndex + 1;
+      }
+    }
+    
+    if (closingTagIndex === -1) return null;
+    
+    const innerContent = content.substring(fullOpeningTag.length, closingTagIndex);
+    const children: HierarchyNode[] = [];
+    let remaining = innerContent.trim();
+    
+    while (remaining) {
+      remaining = remaining.trim();
+      if (!remaining.startsWith('<')) break;
+      
+      const childOpenMatch = remaining.match(/^<([a-zA-Z][a-zA-Z0-9\-:]*)\s*([^>]*)>/);
+      if (!childOpenMatch) break;
+      
+      const childTagName = childOpenMatch[1];
+      const childTagNameLower = childTagName.toLowerCase();
+      const childFullOpenTag = childOpenMatch[0];
+      
+      // Self-closing child?
+      if (childFullOpenTag.endsWith('/>') || getSelfClosingTags().includes(childTagNameLower)) {
+        const childNode = parseElement(childFullOpenTag);
+        if (childNode) {
+          children.push(childNode);
+        }
+        remaining = remaining.substring(childFullOpenTag.length);
+        continue;
+      }
+      
+      // Find closing tag for child
+      let childDepth = 1;
+      let searchStart = childFullOpenTag.length;
+      let childClosingIndex = -1;
+      const childCloseTagPattern = new RegExp(`</${childTagNameLower}>`, 'i');
+      
+      while (childDepth > 0 && searchStart < remaining.length) {
+        const childRemaining = remaining.substring(searchStart);
+        const childOpenPattern = new RegExp(`<${childTagNameLower}(?:\\s|>|\\-)`, 'i');
+        
+        const childOpenMatch = childRemaining.match(childOpenPattern);
+        const childCloseMatch = childRemaining.match(childCloseTagPattern);
+        
+        const childOpenIdx = childOpenMatch ? searchStart + childRemaining.indexOf(childOpenMatch[0]) : -1;
+        const childCloseIdx = childCloseMatch ? searchStart + childRemaining.indexOf(childCloseMatch[0]) : -1;
+        
+        if (childCloseIdx === -1) break;
+        
+        if (childOpenIdx !== -1 && childOpenIdx < childCloseIdx) {
+          childDepth++;
+          searchStart = childOpenIdx + 1;
+        } else {
+          childDepth--;
+          if (childDepth === 0) {
+            childClosingIndex = childCloseIdx + childTagNameLower.length + 3;
+          }
+          searchStart = childCloseIdx + 1;
+        }
+      }
+      
+      if (childClosingIndex === -1) break;
+      
+      const childElement = remaining.substring(0, childClosingIndex);
+      const childNode = parseElement(childElement);
+      
+      if (childNode) {
+        children.push(childNode);
+      }
+      
+      remaining = remaining.substring(childClosingIndex).trim();
+    }
+    
+    return {
+      tagName,
+      classes,
+      id,
+      children,
+    };
+  };
+  
+  return parseElement(contentToProcess);
+};
+
+// Generate CSS from hierarchy
+export const generateHierarchicalCss = (
+  node: HierarchyNode | null,
+  framework: 'tailwind' | 'bootstrap' | 'bulma' | 'materialize',
+  parentSelector = ''
+): string => {
+  if (!node) return '';
+  
+  // Build selector
+  let selector = '';
+  if (parentSelector) {
+    selector = `${parentSelector} > ${node.tagName}`;
+  } else {
+    selector = node.tagName;
+  }
+  
+  // Add ID if present
+  if (node.id) {
+    selector += `#${node.id}`;
+  }
+  
+  // Add classes if present
+  if (node.classes.length > 0) {
+    selector += `.${node.classes.join('.')}`;
+  }
+  
+  let output = '';
+  
+  // Generate CSS rules if node has classes
+  if (node.classes.length > 0) {
+    const cssInput = node.classes.join(' ');
+    const cssDeclarations = convertFrameworkToCss(cssInput, framework);
+    
+    // Clean and format CSS
+    if (cssDeclarations && cssDeclarations.trim() && cssDeclarations !== ' ') {
+      const rules = cssDeclarations
+        .split(';')
+        .map(r => r.trim())
+        .filter(r => r.length > 0)
+        .map(r => `  ${r}${r.endsWith(';') ? '' : ';'}`)
+        .join('\n');
+      
+      if (rules.trim()) {
+        output += `${selector} {\n${rules}\n}\n\n`;
+      }
+    }
+  }
+  
+  // Recursively process children - they'll generate their own CSS rules
+  node.children.forEach(child => {
+    output += generateHierarchicalCss(child, framework, selector);
+  });
+  
+  return output;
+};
+
+// Build visual tree representation
+export const visualizeHierarchy = (node: HierarchyNode | null, depth = 0): string => {
+  if (!node) return '';
+  
+  const indent = '  '.repeat(depth);
+  const classStr = node.classes.length > 0 ? `.${node.classes.join('.')}` : '';
+  const idStr = node.id ? `#${node.id}` : '';
+  
+  let output = `${indent}├─ <${node.tagName}>${idStr}${classStr}\n`;
+  
+  node.children.forEach((child, idx) => {
+    output += visualizeHierarchy(child, depth + 1);
+  });
+  
+  return output;
+};
+
+// All HTML5 semantic and structural tags
+export const HTML5_TAGS = [
+  // Semantic
+  'article', 'aside', 'details', 'dialog', 'figure', 'figcaption', 'footer', 'header', 'main', 'mark', 'nav', 'section', 'summary', 'time',
+  // Document structure
+  'html', 'head', 'body', 'title', 'meta', 'link', 'style', 'script',
+  // Content grouping
+  'div', 'p', 'hr', 'pre', 'blockquote', 'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+  // Text-level
+  'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'q', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'u', 'var', 'wbr',
+  // Forms
+  'form', 'fieldset', 'legend', 'label', 'input', 'button', 'select', 'datalist', 'optgroup', 'option', 'textarea', 'output', 'progress', 'meter',
+  // Tables
+  'table', 'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th',
+  // Media
+  'img', 'canvas', 'svg', 'video', 'audio', 'source', 'picture', 'iframe', 'embed', 'object', 'param',
+  // Scripting
+  'noscript',
+];
+
+export const isValidHtml5Tag = (tag: string): boolean => {
+  return HTML5_TAGS.includes(tag.toLowerCase());
+};
+
+export const getSelfClosingTags = (): string[] => [
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+];
+
+// Enhanced hierarchy with complete HTML structure
+export interface HierarchyNodeEnhanced extends HierarchyNode {
+  closingTag: string;
+  isSelfClosing: boolean;
+  attributes: Record<string, string>;
+}
+
+export const renderFullHtmlStructure = (node: HierarchyNode | null, depth = 0): string => {
+  if (!node) return '';
+  
+  const indent = '  '.repeat(depth);
+  const classStr = node.classes.length > 0 ? ` class="${node.classes.join(' ')}"` : '';
+  const idStr = node.id ? ` id="${node.id}"` : '';
+  const selfClosing = getSelfClosingTags().includes(node.tagName.toLowerCase());
+  
+  let output = '';
+  
+  if (selfClosing) {
+    output += `${indent}<${node.tagName}${idStr}${classStr} />\n`;
+  } else {
+    output += `${indent}<${node.tagName}${idStr}${classStr}>\n`;
+    
+    // Render children
+    node.children.forEach(child => {
+      output += renderFullHtmlStructure(child, depth + 1);
+    });
+    
+    output += `${indent}</${node.tagName}>\n`;
+  }
+  
+  return output;
+};
+
