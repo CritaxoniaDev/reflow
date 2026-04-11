@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, CloudLightning, Phone, PaintBucket } from 'lucide-react'
 import { Button } from '@/components/ui'
@@ -238,7 +239,8 @@ const Newsletter = ({ colors }: { colors: string[] }) => {
     )
 }
 
-export default function PreviewPage() {
+// Separate component for content that uses useSearchParams
+function PreviewContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [palette, setPalette] = useState<string[]>([])
@@ -306,5 +308,20 @@ export default function PreviewPage() {
                 )}
             </div>
         </div>
+    )
+}
+
+// Main page component with Suspense
+export default function PreviewPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="mb-4">Loading preview...</div>
+                </div>
+            </div>
+        }>
+            <PreviewContent />
+        </Suspense>
     )
 }
